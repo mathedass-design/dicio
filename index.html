@@ -110,6 +110,38 @@
         button.btn-add:active { transform: scale(0.98); }
         button.btn-add:hover { background: var(--primaria-hover); }
 
+        /* MÁGICA: BOTÕES FLUTUANTES (FAB) */
+        .fab-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 900;
+        }
+        .btn-flutuante {
+            background: var(--primaria);
+            color: #ffffff;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 18px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            display: none; /* Controlado via JavaScript para só aparecer quando precisar */
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .btn-flutuante:hover {
+            transform: scale(1.1);
+            background: var(--primaria-hover);
+        }
+        body.dark-mode .btn-flutuante {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+        }
+
         @media (min-width: 900px) {
             .container { 
                 grid-template-columns: 320px 1fr; 
@@ -212,6 +244,8 @@
                 display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
                 grid-auto-rows: 250px; height: auto; gap: 15px;
             }
+            .fab-container { bottom: 20px; right: 20px; gap: 10px; }
+            .btn-flutuante { width: 45px; height: 45px; font-size: 16px; }
         }
     </style>
 </head>
@@ -253,6 +287,11 @@
         <div class="painel-lista-wrapper">
             <ul id="minhaLista" class="grid-view"></ul>
         </div>
+    </div>
+
+    <div class="fab-container" id="fabPaginacao">
+        <button class="btn-flutuante" id="fabPrev" onclick="mudarPagina(-1)" title="Página Anterior">&#10094;</button>
+        <button class="btn-flutuante" id="fabNext" onclick="mudarPagina(1)" title="Próxima Página">&#10095;</button>
     </div>
 
     <div class="modal-overlay" id="modalEdicao">
@@ -448,6 +487,22 @@
             ));
         }
 
+        // NOVO: Função chamada pelos botões flutuantes para trocar de página
+        function mudarPagina(direcao) {
+            const busca = document.getElementById('campoBusca').value.toLowerCase();
+            const arrayAtual = palavrasGlobais.filter(item => 
+                item.palavra.toLowerCase().includes(busca) || item.significado.toLowerCase().includes(busca)
+            );
+            
+            const totalPaginas = Math.ceil(arrayAtual.length / itensPorPagina);
+            let novaPagina = paginaAtual + direcao;
+            
+            if (novaPagina >= 1 && novaPagina <= totalPaginas) {
+                paginaAtual = novaPagina;
+                renderizarNaTela(arrayAtual);
+            }
+        }
+
         function renderizarNaTela(arrayDados) {
             const lista = document.getElementById('minhaLista');
             const divPaginacao = document.getElementById('paginacao');
@@ -483,20 +538,39 @@
             const slotsVazios = itensPorPagina - itensPagina.length;
             for(let i = 0; i < slotsVazios; i++) {
                 const emptyLi = document.createElement('li');
-                emptyLi.className = 'card empty-card'; // <-- Classe específica que esconde perfeitamente
+                emptyLi.className = 'card empty-card'; 
                 emptyLi.style.visibility = 'hidden';
                 emptyLi.style.pointerEvents = 'none';
                 lista.appendChild(emptyLi);
             }
 
+            // NOVA LÓGICA DE PAGINAÇÃO (MÁXIMO DE 9 NÚMEROS VISÍVEIS)
             if (totalPaginas > 1) {
-                for(let i = 1; i <= totalPaginas; i++) {
+                let maxVisiveis = 9; // Limite de botões no topo
+                let startPage = Math.max(1, paginaAtual - Math.floor(maxVisiveis / 2));
+                let endPage = startPage + maxVisiveis - 1;
+
+                if (endPage > totalPaginas) {
+                    endPage = totalPaginas;
+                    startPage = Math.max(1, endPage - maxVisiveis + 1);
+                }
+
+                for(let i = startPage; i <= endPage; i++) {
                     const btn = document.createElement('button');
                     btn.className = 'btn-pag' + (i === paginaAtual ? ' ativo' : '');
                     btn.innerText = i;
                     btn.onclick = () => { paginaAtual = i; renderizarNaTela(arrayDados); };
                     divPaginacao.appendChild(btn);
                 }
+            }
+
+            // CONTROLE DOS BOTÕES FLUTUANTES (SÓ APARECEM SE FOR POSSÍVEL CLICAR)
+            const fabPrev = document.getElementById('fabPrev');
+            const fabNext = document.getElementById('fabNext');
+            
+            if (fabPrev && fabNext) {
+                fabPrev.style.display = (paginaAtual > 1) ? 'flex' : 'none';
+                fabNext.style.display = (paginaAtual < totalPaginas) ? 'flex' : 'none';
             }
         }
 
