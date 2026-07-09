@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <title>Dicionário</title>
     <link rel="shortcut icon" type="image/png" href="logo.png?v=3">
@@ -97,12 +97,45 @@
         .card-add h2 { color: var(--primaria); margin-bottom: 20px; font-size: 20px; display: flex; align-items: center; gap: 8px;}
 
         .inputs-container { display: flex; flex-direction: column; }
-        input.campo, textarea.campo {
-            width: 100%; padding: 14px; margin-bottom: 15px; border: 2px solid var(--input-border);
-            border-radius: 10px; font-size: 15px; background: var(--input-bg); color: var(--texto); transition: 0.3s;
+        
+        .campo-grupo { display: flex; flex-direction: column; margin-bottom: 15px; }
+        .toolbar-formato {
+            display: flex; gap: 5px; background: var(--input-bg); border: 2px solid var(--input-border);
+            border-bottom: none; padding: 6px 10px; border-radius: 10px 10px 0 0; width: 100%;
         }
-        input.campo:focus, textarea.campo:focus { border-color: var(--primaria); outline: none; background: var(--branco);}
-        textarea.campo { resize: vertical; min-height: 80px; }
+        .btn-formato {
+            background: transparent; border: none; color: var(--texto);
+            width: 30px; height: 30px; border-radius: 6px; cursor: pointer; font-size: 15px; font-family: serif;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
+        .btn-formato:hover { background: rgba(0,0,0,0.1); }
+        body.dark-mode .btn-formato:hover { background: rgba(255,255,255,0.1); }
+        
+        input.campo, .div-editor {
+            width: 100%; padding: 14px; margin-bottom: 15px; border: 2px solid var(--input-border);
+            border-radius: 10px; font-size: 16px; background: var(--input-bg); color: var(--texto); transition: 0.3s;
+        }
+        
+        .div-editor {
+            resize: vertical;
+            min-height: 80px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            cursor: text;
+            outline: none;
+        }
+        .div-editor:empty:before {
+            content: attr(placeholder);
+            color: #9ca3af;
+            pointer-events: none;
+            display: block;
+        }
+        
+        .campo-grupo .div-editor { 
+            border-top-left-radius: 0; border-top-right-radius: 0; border-top: 1px dashed var(--input-border); margin-bottom: 0; 
+        }
+        
+        input.campo:focus, .div-editor:focus { border-color: var(--primaria); outline: none; background: var(--branco);}
 
         button.btn-add {
             width: 100%; background: var(--primaria); color: #ffffff; border: none;
@@ -151,6 +184,8 @@
             }
             .card-add { height: 100%; display: flex; flex-direction: column; }
             .inputs-container { flex-grow: 1; display: flex; flex-direction: column; }
+            
+            .campo-grupo-exemplo { flex-grow: 1; display: flex; flex-direction: column; }
             #exemplo { flex-grow: 1; resize: none; }
             
             .painel-lista-wrapper { 
@@ -195,7 +230,7 @@
             background: rgba(255,255,255,0.5); padding: 10px; border-radius: 10px;
             font-style: italic; color: #374151; font-size: 13px;
             flex-grow: 1; overflow: hidden;
-            white-space: pre-wrap; /* Mágica para respeitar as quebras de linha nos cards */
+            white-space: pre-wrap; 
         }
 
         .modal-overlay {
@@ -279,8 +314,25 @@
             <h2>✨ Qual a nova?</h2>
             <div class="inputs-container">
                 <input type="text" id="palavra" class="campo" placeholder="Digite uma nova palavra">
-                <textarea id="significado" class="campo" placeholder="Significado..."></textarea>
-                <textarea id="exemplo" class="campo" placeholder="Exemplo de uso..."></textarea>
+                
+                <div class="campo-grupo">
+                    <div class="toolbar-formato">
+                        <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('bold', false, null)" title="Negrito"><b>B</b></button>
+                        <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('italic', false, null)" title="Itálico"><i>I</i></button>
+                        <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('strikeThrough', false, null)" title="Tachado"><s>S</s></button>
+                    </div>
+                    <div id="significado" class="campo div-editor" contenteditable="true" placeholder="Significado..."></div>
+                </div>
+
+                <div class="campo-grupo campo-grupo-exemplo" style="margin-bottom: 20px;">
+                    <div class="toolbar-formato">
+                        <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('bold', false, null)" title="Negrito"><b>B</b></button>
+                        <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('italic', false, null)" title="Itálico"><i>I</i></button>
+                        <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('strikeThrough', false, null)" title="Tachado"><s>S</s></button>
+                    </div>
+                    <div id="exemplo" class="campo div-editor" contenteditable="true" placeholder="Exemplo de uso..."></div>
+                </div>
+
             </div>
             <button class="btn-add" onclick="salvarNaNuvem()">Salvar</button>
         </div>
@@ -301,8 +353,25 @@
             <h3>✏️ Editar Palavra</h3>
             <input type="hidden" id="editRow">
             <input type="text" id="editPalavra" class="campo">
-            <textarea id="editSignificado" class="campo"></textarea>
-            <textarea id="editExemplo" class="campo"></textarea>
+            
+            <div class="campo-grupo">
+                <div class="toolbar-formato">
+                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('bold', false, null)"><b>B</b></button>
+                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('italic', false, null)"><i>I</i></button>
+                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('strikeThrough', false, null)"><s>S</s></button>
+                </div>
+                <div id="editSignificado" class="campo div-editor" contenteditable="true"></div>
+            </div>
+
+            <div class="campo-grupo" style="margin-bottom: 20px;">
+                <div class="toolbar-formato">
+                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('bold', false, null)"><b>B</b></button>
+                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('italic', false, null)"><i>I</i></button>
+                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('strikeThrough', false, null)"><s>S</s></button>
+                </div>
+                <div id="editExemplo" class="campo div-editor" contenteditable="true"></div>
+            </div>
+
             <button class="btn-add" onclick="enviarEdicao()">Salvar Modificação</button>
             <button class="btn-cancelar" onclick="fecharModal('modalEdicao')">Cancelar</button>
         </div>
@@ -322,7 +391,6 @@
     </div>
 
     <script>
-        // === SEU LINK DO GOOGLE ===
         const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbzstpIw7NBIIELMLisCHz4Gk6PbH6D0FSWtPaW2CXN0ehnDyOg-1pJ_qCZhVgp73wV1/exec"; 
         
         let palavrasGlobais = [];
@@ -337,19 +405,44 @@
             '#f0e6ef', '#e4c1f9', '#d3f8e2', '#e4c1f9', '#f694c1', '#ede7b1', '#a9def9', '#e4f1ee', '#ffc8dd', '#ffafcc'
         ];
 
-        // Formata frase padrão (Maiúscula e ponto final)
+        function escapeHTML(str) {
+            if(!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // A MÁGICA FOI AQUI: Expandimos a lista de tags aceitas para garantir que o formato do celular e do PC funcionem igual
+        function processarTextoFinal(str) {
+            if(!str) return '';
+            let seguro = escapeHTML(str);
+            return seguro
+                .replace(/&lt;b&gt;/gi, '<b>').replace(/&lt;\/b&gt;/gi, '</b>')
+                .replace(/&lt;strong&gt;/gi, '<strong>').replace(/&lt;\/strong&gt;/gi, '</strong>')
+                .replace(/&lt;i&gt;/gi, '<i>').replace(/&lt;\/i&gt;/gi, '</i>')
+                .replace(/&lt;em&gt;/gi, '<em>').replace(/&lt;\/em&gt;/gi, '</em>')
+                .replace(/&lt;s&gt;/gi, '<s>').replace(/&lt;\/s&gt;/gi, '</s>')
+                .replace(/&lt;strike&gt;/gi, '<strike>').replace(/&lt;\/strike&gt;/gi, '</strike>')
+                .replace(/&lt;del&gt;/gi, '<del>').replace(/&lt;\/del&gt;/gi, '</del>')
+                .replace(/&lt;u&gt;/gi, '<u>').replace(/&lt;\/u&gt;/gi, '</u>')
+                .replace(/&lt;div&gt;/gi, '<div>').replace(/&lt;\/div&gt;/gi, '</div>')
+                .replace(/&lt;br\s*[\/]?&gt;/gi, '<br>');
+        }
+
         function formatarFrase(str) {
             if(!str) return '';
             let t = str.trim();
             if(t.length === 0) return '';
-            t = t.charAt(0).toUpperCase() + t.slice(1);
-            if (!/[.!?]$/.test(t)) {
-                t += '.';
+            
+            t = t.replace(/^((?:<\w+>)*\s*)(.)/, function(match, tags, letra) {
+                return tags + letra.toUpperCase();
+            });
+            
+            let textoSemTagFinal = t.replace(/(<\/\w+>)+$/, '');
+            if (!/[.!?]$/.test(textoSemTagFinal)) {
+                t = textoSemTagFinal + '.' + t.substring(textoSemTagFinal.length);
             }
             return t;
         }
 
-        // NOVO: Aplica a bolinha e formatação visual perfeitamente para exibir nas caixas (Cards/Modal)
         function formatarExemploVisu(exRaw) {
             if (!exRaw || exRaw === '-') return '';
             return exRaw.split('\n')
@@ -366,37 +459,47 @@
             }
             carregarDaNuvem();
 
-            // MÁGICA DE EDITOR EM TEMPO REAL (Garante a bolinha ao digitar/pressionar enter)
             const txtExemplo = document.getElementById('exemplo');
             const txtEditExemplo = document.getElementById('editExemplo');
 
             function handleEnterBolinha(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    let start = this.selectionStart;
-                    let end = this.selectionEnd;
-                    let val = this.value;
-                    // Insere nova linha já com a bolinha e o espaço
-                    this.value = val.substring(0, start) + '\n● ' + val.substring(end);
-                    this.selectionStart = this.selectionEnd = start + 3;
+                    document.execCommand('insertText', false, '\n● ');
                 }
             }
             
             function handleFocusBolinha() {
-                // Se a pessoa clicou na caixa vazia, já coloca a bolinha automática para iniciar
-                if (this.value.trim() === '') {
-                    this.value = '● ';
+                if (this.innerText.trim() === '') {
+                    this.innerHTML = '● ';
+                    let range = document.createRange();
+                    let sel = window.getSelection();
+                    range.selectNodeContents(this);
+                    range.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
                 }
             }
 
-            if (txtExemplo) {
-                txtExemplo.addEventListener('keydown', handleEnterBolinha);
-                txtExemplo.addEventListener('focus', handleFocusBolinha);
+            function handlePaste(e) {
+                e.preventDefault();
+                let text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                document.execCommand('insertText', false, text);
             }
-            if (txtEditExemplo) {
-                txtEditExemplo.addEventListener('keydown', handleEnterBolinha);
-                txtEditExemplo.addEventListener('focus', handleFocusBolinha);
-            }
+
+            [txtExemplo, txtEditExemplo].forEach(el => {
+                if(el) {
+                    el.addEventListener('keydown', handleEnterBolinha);
+                    el.addEventListener('focus', handleFocusBolinha);
+                    el.addEventListener('paste', handlePaste);
+                }
+            });
+
+            const txtSig = document.getElementById('significado');
+            const txtEditSig = document.getElementById('editSignificado');
+            [txtSig, txtEditSig].forEach(el => {
+                if(el) el.addEventListener('paste', handlePaste);
+            });
         });
 
         function toggleTema() {
@@ -413,8 +516,8 @@
 
         function salvarNaNuvem() {
             const pal = document.getElementById('palavra').value.trim();
-            const sig = document.getElementById('significado').value.trim();
-            const ex = document.getElementById('exemplo').value.trim();
+            const sig = document.getElementById('significado').innerHTML.trim();
+            const ex = document.getElementById('exemplo').innerHTML.trim();
 
             if(!pal || !sig) return alert("Preencha palavra e significado!");
 
@@ -425,8 +528,8 @@
             renderizarNaTela(palavrasGlobais);
 
             document.getElementById('palavra').value = '';
-            document.getElementById('significado').value = '';
-            document.getElementById('exemplo').value = '';
+            document.getElementById('significado').innerHTML = '';
+            document.getElementById('exemplo').innerHTML = '';
 
             const url = `${GOOGLE_APP_URL}?action=salvar&palavra=${encodeURIComponent(pal)}&significado=${encodeURIComponent(sig)}&exemplo=${encodeURIComponent(ex)}`;
             fetch(url).then(r => r.json()).then(() => { carregarDaNuvemBaixoPano(); });
@@ -459,20 +562,19 @@
 
             document.getElementById('editRow').value = item.row;
             document.getElementById('editPalavra').value = item.palavra;
-            document.getElementById('editSignificado').value = item.significado;
+            document.getElementById('editSignificado').innerHTML = item.significado;
             
-            // Corrige bolinhas antigas se a pessoa salvou com *, - ou vazio
             let oldEx = (item.exemplo === '-' || !item.exemplo) ? '' : item.exemplo;
             if(oldEx !== '') {
                 oldEx = oldEx.split('\n').map(l => {
                     let t = l.trim();
-                    if(t !== '' && !t.startsWith('●')) {
+                    if(t !== '' && t.indexOf('●') === -1) {
                         t = '● ' + t.replace(/^[\*\-]\s*/, '');
                     }
                     return t;
                 }).join('\n');
             }
-            document.getElementById('editExemplo').value = oldEx;
+            document.getElementById('editExemplo').innerHTML = oldEx;
             
             document.getElementById('modalEdicao').style.display = 'flex';
         }
@@ -485,8 +587,8 @@
         function enviarEdicao() {
             const row = document.getElementById('editRow').value;
             const pal = document.getElementById('editPalavra').value.trim();
-            const sig = document.getElementById('editSignificado').value.trim();
-            const ex = document.getElementById('editExemplo').value.trim();
+            const sig = document.getElementById('editSignificado').innerHTML.trim();
+            const ex = document.getElementById('editExemplo').innerHTML.trim();
 
             fecharModal('modalEdicao'); 
 
@@ -521,13 +623,12 @@
             document.getElementById('boxCompleto').style.backgroundColor = obterCorFixa(item.palavra);
             document.getElementById('compPalavra').innerText = item.palavra;
             
-            document.getElementById('compSignificado').innerText = formatarFrase(item.significado);
+            document.getElementById('compSignificado').innerHTML = processarTextoFinal(formatarFrase(item.significado));
             
             const divExemplo = document.getElementById('compExemplo');
             if (item.exemplo && item.exemplo !== '-' && item.exemplo.trim() !== '') {
                 divExemplo.style.display = 'block'; 
-                // Exibe as bolinhas bonitinhas no visual completo
-                divExemplo.innerText = formatarExemploVisu(item.exemplo);
+                divExemplo.innerHTML = processarTextoFinal(formatarExemploVisu(item.exemplo));
             } else {
                 divExemplo.style.display = 'none';
             }
@@ -536,7 +637,7 @@
                 <button class="btn-acao" onclick="copiarPalavra('${item.row}', this)">📋 Copiar</button>
                 <button class="btn-acao" onclick="abrirEdicaoDoModal('${item.row}')">✏️ Editar</button>
                 <button class="btn-acao" onclick="baixarImagem('${item.row}', this)">📥 Baixar</button>
-                <button class="btn-acao" style="background: rgba(239, 68, 68, 0.15); color: #b91c1c; margin-left: auto;" onclick="apagarPalavra('${item.row}')">🗑️ Apagar</button>
+                <button class="btn-acao" style="background: rgba(239, 68, 68, 0.15); color: #b91c1c;" onclick="apagarPalavra('${item.row}')">🗑️ Apagar</button>
             `;
 
             document.getElementById('modalCompleto').style.display = 'flex';
@@ -547,7 +648,9 @@
         function copiarPalavra(row, btnElement) {
             const item = palavrasGlobais.find(i => i.row == row);
             if(!item) return;
-            navigator.clipboard.writeText(`${item.palavra} = ${item.significado}`).then(() => {
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = item.significado;
+            navigator.clipboard.writeText(`${item.palavra} = ${tempDiv.innerText}`).then(() => {
                 const textoOriginal = btnElement.innerHTML;
                 btnElement.innerHTML = '✅ Copiado';
                 setTimeout(() => { btnElement.innerHTML = textoOriginal; }, 2000);
@@ -600,16 +703,15 @@
                 
                 let htmlExemplo = '';
                 if(temExemplo) {
-                    // Exibe a mesma formatação visual (com as bolinhas) direto na tela principal
                     let exFormatado = formatarExemploVisu(item.exemplo);
-                    htmlExemplo = `<div class="card-exemplo">${escapeHTML(exFormatado)}</div>`;
+                    htmlExemplo = `<div class="card-exemplo">${processarTextoFinal(exFormatado)}</div>`;
                 }
 
                 li.innerHTML = `
                     <div class="card-header">
-                        <div class="card-palavra" title="${escapeHTML(item.palavra)}">${escapeHTML(item.palavra)}</div>
+                        <div class="card-palavra" title="${escapeHTML(item.palavra)}">${processarTextoFinal(item.palavra)}</div>
                     </div>
-                    <div class="card-significado">${escapeHTML(sigFormatado)}</div>
+                    <div class="card-significado">${processarTextoFinal(sigFormatado)}</div>
                     ${htmlExemplo}
                 `;
                 lista.appendChild(li);
@@ -652,12 +754,6 @@
             }
         }
 
-        function escapeHTML(str) {
-            if(!str) return '';
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-
-        // ====== FUNÇÃO DE GERAR A IMAGEM MANTIDA 100% ======
         function baixarImagem(row, btnElement) {
             const item = palavrasGlobais.find(i => i.row == row);
             if(!item) return;
@@ -693,7 +789,6 @@
                 
                 const linhasFormatadas = linhas.map((linha, index) => {
                     let texto = linha.trim().replace(/^[\*\-●]\s*/, '');
-                    
                     texto = formatarFrase(texto); 
                     
                     let marginBottom = (index === linhas.length - 1) ? '0' : '20px';
@@ -701,7 +796,7 @@
                     return `
                         <div style="display: flex; align-items: flex-start; gap: 20px; margin-bottom: ${marginBottom}; text-align: left;">
                             <span style="color: #374151; font-size: 30px; line-height: 1.6; padding-top: 3px;">●</span>
-                            <span style="flex: 1;">${escapeHTML(texto)}</span>
+                            <span style="flex: 1;">${processarTextoFinal(texto)}</span>
                         </div>
                     `;
                 }).join('');
@@ -715,8 +810,8 @@
 
             tempDiv.innerHTML = `
                 <div style="width: 100%; display: flex; flex-direction: column;">
-                    <div style="font-size: 110px; font-weight: 900; color: #111827; margin-bottom: 15px;">${escapeHTML(item.palavra)}</div>
-                    <div style="font-size: 55px; line-height: 1.5; color: #111827; margin-bottom: 50px;">${escapeHTML(sigFormatado)}</div>
+                    <div style="font-size: 110px; font-weight: 900; color: #111827; margin-bottom: 15px;">${processarTextoFinal(item.palavra)}</div>
+                    <div style="font-size: 55px; line-height: 1.5; color: #111827; margin-bottom: 50px;">${processarTextoFinal(sigFormatado)}</div>
                     ${htmlExemplo}
                 </div>
             `;
@@ -725,7 +820,7 @@
 
             html2canvas(tempDiv, { scale: 1, backgroundColor: bgColor }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `Palavra_${item.palavra}.png`;
+                link.download = `Palavra_${item.palavra.replace(/<[^>]*>?/gm, '')}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
                 
