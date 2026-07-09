@@ -109,7 +109,6 @@
             margin-bottom: 15px; overflow: hidden;
         }
 
-        /* Estilo da barra de rolagem interna das caixas */
         .div-editor::-webkit-scrollbar { width: 6px; }
         .div-editor::-webkit-scrollbar-track { background: transparent; }
         .div-editor::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -136,8 +135,8 @@
         }
         
         .div-editor {
-            resize: none; /* Mantém o tamanho fixo definido pelo flexbox */
-            overflow-y: auto; /* Adiciona rolagem apenas se o texto for grande */
+            resize: none; 
+            overflow-y: auto; 
             white-space: pre-wrap;
             cursor: text;
             outline: none;
@@ -191,7 +190,20 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.6);
         }
 
-        /* CONFIGURAÇÃO PARA MANTER AS CAIXAS 50/50 NO COMPUTADOR */
+        /* Estilo para o Marca-Texto da Busca */
+        mark.highlight {
+            background-color: #fef08a; /* Amarelo clarinho elegante */
+            color: #1f2937;
+            border-radius: 4px;
+            padding: 0 2px;
+            box-shadow: 0 0 2px rgba(0,0,0,0.1);
+            font-weight: bold;
+        }
+        body.dark-mode mark.highlight {
+            background-color: #ca8a04; /* Amarelo mais fechado pro modo escuro */
+            color: #ffffff;
+        }
+
         @media (min-width: 900px) {
             .container { 
                 grid-template-columns: 320px 1fr; 
@@ -201,7 +213,7 @@
             .card-add { height: 100%; } 
             
             #significado, #exemplo {
-                flex: 1 1 0; /* Divide o espaço restante igualmente */
+                flex: 1 1 0; 
                 min-height: 0;
             }
             #exemplo { margin-bottom: 0; }
@@ -262,7 +274,6 @@
             display: flex; flex-direction: column;
         }
         
-        /* Limita a altura das caixas no modal para não quebrar a tela */
         #editSignificado, #editExemplo {
             min-height: 100px;
             max-height: 200px;
@@ -424,6 +435,19 @@
             '#f0e6ef', '#e4c1f9', '#d3f8e2', '#e4c1f9', '#f694c1', '#ede7b1', '#a9def9', '#e4f1ee', '#ffc8dd', '#ffafcc'
         ];
 
+        // FUNÇÕES PARA O MARCA-TEXTO DA BUSCA
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function destacarTexto(html, busca) {
+            if (!busca || busca.trim() === '') return html;
+            const termoEscapado = escapeRegExp(busca.trim());
+            // Procura o termo escapando tags HTML para não quebrar a formatação
+            const regex = new RegExp(`(${termoEscapado})(?![^<]*>)`, 'gi');
+            return html.replace(regex, '<mark class="highlight">$1</mark>');
+        }
+
         function inserirSeta(e) {
             e.preventDefault(); 
             const sel = window.getSelection();
@@ -505,6 +529,7 @@
                 btn.style.display = 'none';
             }
         }
+        
         function limparBusca() {
             document.getElementById('campoBusca').value = '';
             toggleLimparBusca();
@@ -678,16 +703,20 @@
         function abrirVisaoCompleta(row) {
             const item = palavrasGlobais.find(i => i.row == row);
             if(!item) return;
+            
+            const termoBusca = document.getElementById('campoBusca').value;
 
             document.getElementById('boxCompleto').style.backgroundColor = obterCorFixa(item.palavra);
             document.getElementById('compPalavra').innerText = item.palavra;
             
-            document.getElementById('compSignificado').innerHTML = formatarSignificadoHTML(item.significado);
+            let sigFormatado = formatarSignificadoHTML(item.significado);
+            document.getElementById('compSignificado').innerHTML = destacarTexto(sigFormatado, termoBusca);
             
             const divExemplo = document.getElementById('compExemplo');
             if (item.exemplo && item.exemplo !== '-' && item.exemplo.trim() !== '') {
                 divExemplo.style.display = 'block'; 
-                divExemplo.innerHTML = formatarExemploHTML(item.exemplo);
+                let exFormatado = formatarExemploHTML(item.exemplo);
+                divExemplo.innerHTML = destacarTexto(exFormatado, termoBusca);
             } else {
                 divExemplo.style.display = 'none';
             }
@@ -722,16 +751,26 @@
         function filtrarLista() {
             paginaAtual = 1; 
             const busca = document.getElementById('campoBusca').value.toLowerCase();
-            renderizarNaTela(palavrasGlobais.filter(item => 
-                item.palavra.toLowerCase().includes(busca) || item.significado.toLowerCase().includes(busca)
-            ));
+            
+            renderizarNaTela(palavrasGlobais.filter(item => {
+                const pal = item.palavra ? item.palavra.toLowerCase() : '';
+                const sig = item.significado ? item.significado.toLowerCase() : '';
+                const ex = (item.exemplo && item.exemplo !== '-') ? item.exemplo.toLowerCase() : '';
+                
+                return pal.includes(busca) || sig.includes(busca) || ex.includes(busca);
+            }));
         }
 
         function mudarPagina(direcao) {
             const busca = document.getElementById('campoBusca').value.toLowerCase();
-            const arrayAtual = palavrasGlobais.filter(item => 
-                item.palavra.toLowerCase().includes(busca) || item.significado.toLowerCase().includes(busca)
-            );
+            
+            const arrayAtual = palavrasGlobais.filter(item => {
+                const pal = item.palavra ? item.palavra.toLowerCase() : '';
+                const sig = item.significado ? item.significado.toLowerCase() : '';
+                const ex = (item.exemplo && item.exemplo !== '-') ? item.exemplo.toLowerCase() : '';
+                
+                return pal.includes(busca) || sig.includes(busca) || ex.includes(busca);
+            });
             
             const totalPaginas = Math.ceil(arrayAtual.length / itensPorPagina);
             let novaPagina = paginaAtual + direcao;
@@ -746,6 +785,8 @@
             const lista = document.getElementById('minhaLista');
             const divPaginacao = document.getElementById('paginacao');
             lista.innerHTML = ''; divPaginacao.innerHTML = '';
+            
+            const termoBusca = document.getElementById('campoBusca').value;
 
             const totalPaginas = Math.ceil(arrayDados.length / itensPorPagina);
             if (paginaAtual > totalPaginas && totalPaginas > 0) paginaAtual = totalPaginas;
@@ -761,11 +802,14 @@
                 li.onclick = function() { abrirVisaoCompleta(item.row); };
 
                 let sigFormatado = formatarSignificadoHTML(item.significado);
+                sigFormatado = destacarTexto(sigFormatado, termoBusca);
+                
                 let temExemplo = (item.exemplo && item.exemplo.trim() !== '' && item.exemplo !== '-');
                 
                 let htmlExemplo = '';
                 if(temExemplo) {
                     let exFormatado = formatarExemploHTML(item.exemplo);
+                    exFormatado = destacarTexto(exFormatado, termoBusca);
                     htmlExemplo = `<div class="card-exemplo">${exFormatado}</div>`;
                 }
 
@@ -844,6 +888,8 @@
             });
 
             let sigFormatado = formatarSignificadoHTML(item.significado);
+            // IMPORTANTE: Aqui na geração de imagem a gente não coloca a função destacarTexto()
+            // Assim o seu card salvo no computador não fica "sujo" com a busca.
             
             let htmlExemplo = '';
             if (item.exemplo && item.exemplo !== '-' && item.exemplo.trim() !== '') {
