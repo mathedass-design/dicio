@@ -63,7 +63,7 @@
         
         .header-app h1 { font-size: 24px; font-weight: 900; display: flex; align-items: center; gap: 10px;}
 
-        /* Estilo do Contador de Cards */
+        /* Estilo do Contador e Botão de Imprimir */
         .contador-cards {
             background: rgba(255, 255, 255, 0.25);
             border: 1px solid rgba(255, 255, 255, 0.4);
@@ -79,6 +79,13 @@
             backdrop-filter: blur(4px);
             min-width: 40px;
         }
+
+        .btn-imprimir {
+            background: rgba(255,255,255,0.2); color: #ffffff; border: none;
+            width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
+        .btn-imprimir:hover { background: rgba(255,255,255,0.4); }
 
         .centro-header { display: flex; justify-content: center; }
         .busca-box { 
@@ -214,7 +221,6 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.6);
         }
 
-        /* Estilo para o Marca-Texto da Busca */
         mark.highlight {
             background-color: #fef08a; 
             color: #1f2937;
@@ -236,16 +242,11 @@
             }
             .card-add { height: 100%; } 
             
-            #significado, #exemplo {
-                flex: 1 1 0; 
-                min-height: 0;
-            }
+            #significado, #exemplo { flex: 1 1 0; min-height: 0; }
             #exemplo { margin-bottom: 0; }
 
             .painel-lista-wrapper { 
-                width: 100%; 
-                height: 100%; 
-                overflow: hidden; 
+                width: 100%; height: 100%; overflow: hidden; 
                 display: flex; flex-direction: column; 
             }
             
@@ -266,38 +267,26 @@
         }
         .grid-view .card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
         
-        .empty-card {
-            background: transparent !important;
-            box-shadow: none !important;
-            border: none !important;
-        }
+        .empty-card { background: transparent !important; box-shadow: none !important; border: none !important; }
 
         .card-header { 
-            display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 10px;
-            flex-shrink: 0; /* Impede que esmague */
+            display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 10px; flex-shrink: 0; 
         }
         
         .card-palavra { font-size: 20px; font-weight: 900; color: #111827; word-break: break-word; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         
-        /* CORREÇÃO APLICADA AQUI */
         .card-significado { 
             font-size: 15px; color: #374151; margin-bottom: 10px; line-height: 1.4; 
-            overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-            flex-shrink: 0; /* Isso é o principal que impede o esmagamento das linhas */
+            overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; flex-shrink: 0; 
         }
         
-        /* Garante que textos colados (com <br> ou <div> ocultos) não quebrem o design */
-        .card-significado * {
-            display: inline !important;
-        }
+        .card-significado * { display: inline !important; }
 
-        /* CORREÇÃO APLICADA AQUI */
         .card-exemplo {
             background: rgba(255,255,255,0.5); padding: 10px; border-radius: 10px;
             font-style: italic; color: #374151; font-size: 13px;
             overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-            white-space: pre-wrap; 
-            flex-shrink: 0; /* Impede o esmagamento */
+            white-space: pre-wrap; flex-shrink: 0; 
         }
 
         .modal-overlay {
@@ -305,16 +294,12 @@
             background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px;
         }
         .modal-box {
-            position: relative; 
-            background: var(--branco); padding: 30px; border-radius: 20px; width: 100%; max-width: 500px;
+            position: relative; background: var(--branco); padding: 30px; border-radius: 20px; width: 100%; max-width: 500px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: hidden; transition: background 0.3s;
             display: flex; flex-direction: column;
         }
         
-        #editSignificado, #editExemplo {
-            min-height: 100px;
-            max-height: 200px;
-        }
+        #editSignificado, #editExemplo { min-height: 100px; max-height: 200px; }
 
         .btn-fechar-x {
             position: absolute; top: 15px; right: 15px;
@@ -345,13 +330,12 @@
         }
         .btn-acao:hover { background: rgba(0,0,0,0.2); }
 
+        /* AREA DE IMPRESSÃO - INVISÍVEL NO USO NORMAL */
+        #areaImpressao { display: none; }
+
         @media (max-width: 899px) {
             body { overflow-y: auto; height: auto; }
-            .header-app { 
-                display: flex; 
-                flex-direction: column; 
-                padding: 15px 20px; gap: 15px; 
-            }
+            .header-app { display: flex; flex-direction: column; padding: 15px 20px; gap: 15px; }
             .header-esq { justify-content: center; width: 100%; }
             .acoes-topo { justify-content: center; flex-wrap: wrap; }
             .card-add { height: auto; max-height: none;}
@@ -362,9 +346,55 @@
                 grid-auto-rows: min-content; height: auto; gap: 15px;
             }
             .empty-card { display: none !important; }
-
             .fab-container { bottom: 20px; right: 20px; gap: 10px; }
             .btn-flutuante { width: 45px; height: 45px; font-size: 16px; }
+        }
+
+        /* REGRAS ESPECÍFICAS PARA IMPRESSÃO/PDF */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                overflow: visible !important;
+                height: auto !important;
+            }
+            
+            /* Esconde tudo da interface do site */
+            .header-app, .container, .fab-container, .modal-overlay {
+                display: none !important;
+            }
+            
+            /* Exibe apenas a área de impressão */
+            #areaImpressao {
+                display: block !important;
+                width: 100%;
+                max-width: 850px; /* Mantém centralizado e limpo */
+                margin: 0 auto;
+                font-family: 'Nunito', sans-serif;
+            }
+            
+            /* Margens seguras de papel A4 */
+            @page {
+                margin: 20mm;
+                size: A4;
+            }
+            
+            /* Estilo dos itens na página de impressão */
+            .print-item {
+                margin-bottom: 24px;
+                font-size: 16px;
+                line-height: 1.6;
+                color: black;
+                page-break-inside: avoid; /* Evita que uma palavra seja cortada no meio entre as páginas */
+            }
+            
+            .print-item strong {
+                font-weight: 900;
+                font-size: 17px;
+            }
+            
+            /* Remove fundos de destaques na impressão */
+            mark.highlight { background: transparent !important; color: black !important; font-weight: inherit !important; }
         }
     </style>
 </head>
@@ -380,6 +410,7 @@
         <div class="header-esq">
             <h1>☁️ Dicionário</h1>
             <div class="contador-cards" id="contadorCards" title="Total de cards">0</div>
+            <button class="btn-imprimir" onclick="imprimirDicionario()" title="Imprimir Dicionário">🖨️</button>
         </div>
         
         <div class="centro-header">
@@ -467,6 +498,8 @@
         </div>
     </div>
 
+    <div id="areaImpressao"></div>
+
     <script>
         const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbzstpIw7NBIIELMLisCHz4Gk6PbH6D0FSWtPaW2CXN0ehnDyOg-1pJ_qCZhVgp73wV1/exec"; 
         
@@ -489,7 +522,34 @@
             }
         }
 
-        // FUNÇÕES PARA O MARCA-TEXTO DA BUSCA
+        // Função para organizar e acionar a impressão
+        function imprimirDicionario() {
+            if(palavrasGlobais.length === 0) {
+                alert("Nenhuma palavra para imprimir.");
+                return;
+            }
+
+            const area = document.getElementById('areaImpressao');
+            area.innerHTML = ''; // Limpa a área antes de recriar
+
+            // Organiza em ordem alfabética para a impressão
+            const palavrasOrdenadas = [...palavrasGlobais].sort((a, b) => a.palavra.localeCompare(b.palavra));
+
+            palavrasOrdenadas.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'print-item';
+                
+                // Formata o texto para ficar com o visual "Palavra: Significado"
+                let sigLimpo = formatarSignificadoHTML(item.significado);
+                div.innerHTML = `<strong>${escapeHTML(item.palavra)}:</strong> ${sigLimpo}`;
+                
+                area.appendChild(div);
+            });
+
+            // Aciona a caixa de diálogo de impressão do navegador
+            window.print();
+        }
+
         function escapeRegExp(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
@@ -497,7 +557,6 @@
         function destacarTexto(html, busca) {
             if (!busca || busca.trim() === '') return html;
             const termoEscapado = escapeRegExp(busca.trim());
-            // Procura o termo escapando tags HTML para não quebrar a formatação
             const regex = new RegExp(`(${termoEscapado})(?![^<]*>)`, 'gi');
             return html.replace(regex, '<mark class="highlight">$1</mark>');
         }
