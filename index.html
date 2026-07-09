@@ -58,7 +58,7 @@
 
         .centro-header { display: flex; justify-content: center; }
         .busca-box { 
-            display: flex; background: var(--branco); border-radius: 12px; 
+            display: flex; align-items: center; background: var(--branco); border-radius: 12px; 
             padding: 8px 20px; width: 100%; max-width: 600px; transition: background 0.3s;
         }
         .busca-box input { 
@@ -66,6 +66,13 @@
             color: var(--texto); background: transparent; 
         }
         
+        .btn-limpar-busca {
+            background: none; border: none; font-size: 14px; color: #9ca3af;
+            cursor: pointer; display: none; padding: 0 5px; transition: 0.2s;
+            margin-left: 5px;
+        }
+        .btn-limpar-busca:hover { color: #ef4444; }
+
         .acoes-topo { display: flex; justify-content: flex-end; align-items: center; gap: 15px; }
         
         .paginacao { display: flex; gap: 6px; }
@@ -93,15 +100,26 @@
         .card-add { 
             background: var(--branco); padding: 25px; border-radius: 20px; 
             box-shadow: 0 5px 15px var(--sombra); transition: background 0.3s;
+            display: flex; flex-direction: column; overflow: hidden;
         }
-        .card-add h2 { color: var(--primaria); margin-bottom: 20px; font-size: 20px; display: flex; align-items: center; gap: 8px;}
+        .card-add h2 { color: var(--primaria); margin-bottom: 20px; font-size: 20px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;}
 
-        .inputs-container { display: flex; flex-direction: column; }
+        .inputs-container { 
+            display: flex; flex-direction: column; flex-grow: 1;
+            margin-bottom: 15px; overflow: hidden;
+        }
+
+        /* Estilo da barra de rolagem interna das caixas */
+        .div-editor::-webkit-scrollbar { width: 6px; }
+        .div-editor::-webkit-scrollbar-track { background: transparent; }
+        .div-editor::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        body.dark-mode .div-editor::-webkit-scrollbar-thumb { background: #475569; }
         
-        .campo-grupo { display: flex; flex-direction: column; margin-bottom: 15px; }
         .toolbar-formato {
-            display: flex; gap: 5px; background: var(--input-bg); border: 2px solid var(--input-border);
-            border-bottom: none; padding: 6px 10px; border-radius: 10px 10px 0 0; width: 100%;
+            display: flex; gap: 8px; background: var(--input-bg); border: 2px solid var(--input-border);
+            padding: 8px 15px; border-radius: 10px; width: 100%; margin-bottom: 15px;
+            justify-content: center; align-items: center; transition: background 0.3s, border-color 0.3s;
+            flex-shrink: 0;
         }
         .btn-formato {
             background: transparent; border: none; color: var(--texto);
@@ -112,17 +130,18 @@
         body.dark-mode .btn-formato:hover { background: rgba(255,255,255,0.1); }
         
         input.campo, .div-editor {
-            width: 100%; padding: 14px; margin-bottom: 15px; border: 2px solid var(--input-border);
+            width: 100%; padding: 14px; border: 2px solid var(--input-border); margin-bottom: 15px;
             border-radius: 10px; font-size: 16px; background: var(--input-bg); color: var(--texto); transition: 0.3s;
+            flex-shrink: 0;
         }
         
         .div-editor {
-            resize: vertical;
-            min-height: 80px;
-            overflow-y: auto;
+            resize: none; /* Mantém o tamanho fixo definido pelo flexbox */
+            overflow-y: auto; /* Adiciona rolagem apenas se o texto for grande */
             white-space: pre-wrap;
             cursor: text;
             outline: none;
+            min-height: 100px;
         }
         .div-editor:empty:before {
             content: attr(placeholder);
@@ -131,16 +150,12 @@
             display: block;
         }
         
-        .campo-grupo .div-editor { 
-            border-top-left-radius: 0; border-top-right-radius: 0; border-top: 1px dashed var(--input-border); margin-bottom: 0; 
-        }
-        
         input.campo:focus, .div-editor:focus { border-color: var(--primaria); outline: none; background: var(--branco);}
 
         button.btn-add {
             width: 100%; background: var(--primaria); color: #ffffff; border: none;
             padding: 16px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;
-            transition: transform 0.1s, background 0.3s; margin-top: auto;
+            transition: transform 0.1s, background 0.3s; margin-top: auto; flex-shrink: 0;
         }
         button.btn-add:active { transform: scale(0.98); }
         button.btn-add:hover { background: var(--primaria-hover); }
@@ -176,18 +191,21 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.6);
         }
 
+        /* CONFIGURAÇÃO PARA MANTER AS CAIXAS 50/50 NO COMPUTADOR */
         @media (min-width: 900px) {
             .container { 
                 grid-template-columns: 320px 1fr; 
                 grid-template-rows: 1fr; 
                 align-items: stretch; 
             }
-            .card-add { height: 100%; display: flex; flex-direction: column; }
-            .inputs-container { flex-grow: 1; display: flex; flex-direction: column; }
+            .card-add { height: 100%; } 
             
-            .campo-grupo-exemplo { flex-grow: 1; display: flex; flex-direction: column; }
-            #exemplo { flex-grow: 1; resize: none; }
-            
+            #significado, #exemplo {
+                flex: 1 1 0; /* Divide o espaço restante igualmente */
+                min-height: 0;
+            }
+            #exemplo { margin-bottom: 0; }
+
             .painel-lista-wrapper { 
                 width: 100%; 
                 height: 100%; 
@@ -240,8 +258,16 @@
         .modal-box {
             position: relative; 
             background: var(--branco); padding: 30px; border-radius: 20px; width: 100%; max-width: 500px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; transition: background 0.3s;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: hidden; transition: background 0.3s;
+            display: flex; flex-direction: column;
         }
+        
+        /* Limita a altura das caixas no modal para não quebrar a tela */
+        #editSignificado, #editExemplo {
+            min-height: 100px;
+            max-height: 200px;
+        }
+
         .btn-fechar-x {
             position: absolute; top: 15px; right: 15px;
             background: rgba(0,0,0,0.05); color: var(--texto); border: none;
@@ -251,10 +277,11 @@
         }
         .btn-fechar-x:hover { background: #ef4444; color: #ffffff; }
 
-        .modal-box h3 { margin-bottom: 20px; color: var(--primaria); margin-right: 30px;} 
+        .modal-box h3 { margin-bottom: 20px; color: var(--primaria); margin-right: 30px; flex-shrink: 0;} 
         .btn-cancelar {
             width: 100%; background: var(--input-border); color: var(--texto); border: none;
             padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.3s;
+            flex-shrink: 0;
         }
         .btn-cancelar:hover { opacity: 0.8; }
 
@@ -274,7 +301,8 @@
             body { overflow-y: auto; height: auto; }
             .header-app { grid-template-columns: 1fr; padding: 15px 20px; gap: 15px; text-align: center; }
             .acoes-topo { justify-content: center; flex-wrap: wrap; }
-            .card-add { height: auto; }
+            .card-add { height: auto; max-height: none;}
+            #significado, #exemplo { min-height: 120px; }
             .painel-lista-wrapper { overflow: visible; height: auto; }
             .grid-view { 
                 display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
@@ -299,7 +327,8 @@
         <div class="centro-header">
             <div class="busca-box">
                 <span>🔍</span>
-                <input type="text" id="campoBusca" oninput="filtrarLista()" placeholder="Buscar...">
+                <input type="text" id="campoBusca" oninput="filtrarLista(); toggleLimparBusca();" placeholder="Buscar...">
+                <button id="btnLimparBusca" class="btn-limpar-busca" onclick="limparBusca()" title="Limpar Busca">✖</button>
             </div>
         </div>
         
@@ -312,28 +341,22 @@
     <div class="container">
         <div class="card-add">
             <h2>✨ Qual a nova?</h2>
+            
             <div class="inputs-container">
                 <input type="text" id="palavra" class="campo" placeholder="Digite uma nova palavra">
                 
-                <div class="campo-grupo">
-                    <div class="toolbar-formato">
-                        <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('bold', false, null)" title="Negrito"><b>B</b></button>
-                        <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('italic', false, null)" title="Itálico"><i>I</i></button>
-                        <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('strikeThrough', false, null)" title="Tachado"><s>S</s></button>
-                    </div>
-                    <div id="significado" class="campo div-editor" contenteditable="true" placeholder="Significado..."></div>
+                <div class="toolbar-formato">
+                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('bold', false, null)" title="Negrito"><b>B</b></button>
+                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('italic', false, null)" title="Itálico"><i>I</i></button>
+                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('strikeThrough', false, null)" title="Tachado"><s>S</s></button>
+                    <div style="width: 2px; height: 18px; background: var(--input-border); border-radius: 2px; margin: 0 5px;"></div>
+                    <button type="button" class="btn-formato" onmousedown="inserirSeta(event)" title="Inserir Seta"><b>→</b></button>
                 </div>
 
-                <div class="campo-grupo campo-grupo-exemplo" style="margin-bottom: 20px;">
-                    <div class="toolbar-formato">
-                        <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('bold', false, null)" title="Negrito"><b>B</b></button>
-                        <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('italic', false, null)" title="Itálico"><i>I</i></button>
-                        <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('strikeThrough', false, null)" title="Tachado"><s>S</s></button>
-                    </div>
-                    <div id="exemplo" class="campo div-editor" contenteditable="true" placeholder="Exemplo de uso..."></div>
-                </div>
-
+                <div id="significado" class="campo div-editor" contenteditable="true" placeholder="Significado..."></div>
+                <div id="exemplo" class="campo div-editor" contenteditable="true" placeholder="Exemplo de uso..."></div>
             </div>
+            
             <button class="btn-add" onclick="salvarNaNuvem()">Salvar</button>
         </div>
 
@@ -351,25 +374,21 @@
         <div class="modal-box">
             <button class="btn-fechar-x" onclick="fecharModal('modalEdicao')">✖</button>
             <h3>✏️ Editar Palavra</h3>
-            <input type="hidden" id="editRow">
-            <input type="text" id="editPalavra" class="campo">
             
-            <div class="campo-grupo">
+            <div class="inputs-container" style="margin-bottom: 0;">
+                <input type="hidden" id="editRow">
+                <input type="text" id="editPalavra" class="campo">
+                
                 <div class="toolbar-formato">
-                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('bold', false, null)"><b>B</b></button>
-                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('italic', false, null)"><i>I</i></button>
-                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('strikeThrough', false, null)"><s>S</s></button>
+                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('bold', false, null)" title="Negrito"><b>B</b></button>
+                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('italic', false, null)" title="Itálico"><i>I</i></button>
+                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('strikeThrough', false, null)" title="Tachado"><s>S</s></button>
+                    <div style="width: 2px; height: 18px; background: var(--input-border); border-radius: 2px; margin: 0 5px;"></div>
+                    <button type="button" class="btn-formato" onmousedown="inserirSeta(event)" title="Inserir Seta"><b>→</b></button>
                 </div>
-                <div id="editSignificado" class="campo div-editor" contenteditable="true"></div>
-            </div>
 
-            <div class="campo-grupo" style="margin-bottom: 20px;">
-                <div class="toolbar-formato">
-                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('bold', false, null)"><b>B</b></button>
-                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('italic', false, null)"><i>I</i></button>
-                    <button type="button" class="btn-formato" onmousedown="event.preventDefault(); document.execCommand('strikeThrough', false, null)"><s>S</s></button>
-                </div>
-                <div id="editExemplo" class="campo div-editor" contenteditable="true"></div>
+                <div id="editSignificado" class="campo div-editor" contenteditable="true"></div>
+                <div id="editExemplo" class="campo div-editor" contenteditable="true" style="margin-bottom: 0;"></div>
             </div>
 
             <button class="btn-add" onclick="enviarEdicao()">Salvar Modificação</button>
@@ -405,24 +424,37 @@
             '#f0e6ef', '#e4c1f9', '#d3f8e2', '#e4c1f9', '#f694c1', '#ede7b1', '#a9def9', '#e4f1ee', '#ffc8dd', '#ffafcc'
         ];
 
-        // Escape apenas para o input do Título da Palavra (por segurança)
+        function inserirSeta(e) {
+            e.preventDefault(); 
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            
+            let textToInsert = ' → '; 
+            
+            const node = sel.focusNode;
+            const offset = sel.focusOffset;
+            
+            if (node && node.nodeType === 3 && offset > 0) {
+                const charAntes = node.textContent.charAt(offset - 1);
+                if (charAntes === ' ' || charAntes === '\u00A0') {
+                    textToInsert = '→ '; 
+                }
+            }
+            
+            document.execCommand('insertText', false, textToInsert);
+        }
+
         function escapeHTML(str) {
             if(!str) return '';
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
-
-        // MÁGICA: Novas funções robustas que auto-formatam as Letras Maiúsculas e o Ponto Final
-        // passando "por fora" das tags HTML, sem quebrar absolutamente nada da formatação do seu editor.
         
         function formatarSignificadoHTML(htmlStr) {
             if (!htmlStr) return '';
-            
-            // 1. Coloca a primeira letra em maiúscula ignorando tags de formatação invisíveis no início
             htmlStr = htmlStr.replace(/^((?:<[^>]+>|\s|&nbsp;)*)([a-zA-ZáéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ])/i, function(match, tags, letra) {
                 return tags + letra.toUpperCase();
             });
 
-            // 2. Coloca o ponto final garantindo que vai ficar exatamente no final da última letra visível (antes de fechar tags)
             let trailing = '';
             htmlStr = htmlStr.replace(/(?:\s|&nbsp;|<[^>]+>)+$/, function(match) {
                 trailing = match;
@@ -439,19 +471,15 @@
 
         function formatarExemploHTML(htmlStr) {
             if (!htmlStr || htmlStr === '-') return '';
-            
-            // Separa os parágrafos pela bolinha para formatar um por um
             let lines = htmlStr.split('●');
             
             for (let i = 1; i < lines.length; i++) {
                 let line = lines[i];
                 
-                // Maiúscula na primeira letra de cada exemplo
                 line = line.replace(/^((?:<[^>]+>|\s|&nbsp;)*)([a-zA-ZáéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ])/i, function(match, tags, letra) {
                     return tags + letra.toUpperCase();
                 });
 
-                // Ponto final isolado em cada exemplo
                 let trailing = '';
                 line = line.replace(/(?:\s|&nbsp;|<[^>]+>)+$/, function(match) {
                     trailing = match;
@@ -467,6 +495,20 @@
             }
             
             return lines.join('●');
+        }
+
+        function toggleLimparBusca() {
+            const btn = document.getElementById('btnLimparBusca');
+            if (document.getElementById('campoBusca').value.length > 0) {
+                btn.style.display = 'block';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+        function limparBusca() {
+            document.getElementById('campoBusca').value = '';
+            toggleLimparBusca();
+            filtrarLista();
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -497,7 +539,6 @@
                 }
             }
 
-            // Proteção para colar texto: remove formatações estranhas de outros sites
             function handlePaste(e) {
                 e.preventDefault();
                 let text = (e.originalEvent || e).clipboardData.getData('text/plain');
@@ -532,11 +573,13 @@
         }
 
         function salvarNaNuvem() {
-            const pal = document.getElementById('palavra').value.trim();
+            let pal = document.getElementById('palavra').value.trim();
             const sig = document.getElementById('significado').innerHTML.trim();
             const ex = document.getElementById('exemplo').innerHTML.trim();
 
-            if(!pal || !sig) return alert("Preencha palavra e significado!");
+            if(!pal) return alert("Preencha a palavra!");
+            
+            pal = pal.charAt(0).toUpperCase() + pal.slice(1);
 
             const idTemporario = "temp-" + Date.now();
             palavrasGlobais.unshift({ row: idTemporario, palavra: pal, significado: sig, exemplo: ex });
@@ -580,12 +623,10 @@
             document.getElementById('editRow').value = item.row;
             document.getElementById('editPalavra').value = item.palavra;
             
-            // Atribuição limpa e crua do HTML salvo
             document.getElementById('editSignificado').innerHTML = item.significado;
             
             let oldEx = (item.exemplo === '-' || !item.exemplo) ? '' : item.exemplo;
             if(oldEx !== '' && oldEx.indexOf('●') === -1) {
-                // Conversão apenas para notas super antigas que não tinham as bolinhas do novo editor
                 oldEx = oldEx.replace(/<[^>]*>?/gm, '');
                 oldEx = oldEx.split('\n').map(l => l.trim() !== '' ? '● ' + l.trim() : '').join('<br>');
             }
@@ -601,9 +642,12 @@
 
         function enviarEdicao() {
             const row = document.getElementById('editRow').value;
-            const pal = document.getElementById('editPalavra').value.trim();
+            let pal = document.getElementById('editPalavra').value.trim();
             const sig = document.getElementById('editSignificado').innerHTML.trim();
             const ex = document.getElementById('editExemplo').innerHTML.trim();
+
+            if(!pal) return alert("Preencha a palavra!");
+            pal = pal.charAt(0).toUpperCase() + pal.slice(1);
 
             fecharModal('modalEdicao'); 
 
@@ -638,7 +682,6 @@
             document.getElementById('boxCompleto').style.backgroundColor = obterCorFixa(item.palavra);
             document.getElementById('compPalavra').innerText = item.palavra;
             
-            // Aqui as funções de auto-maiuscula e ponto entram com maestria
             document.getElementById('compSignificado').innerHTML = formatarSignificadoHTML(item.significado);
             
             const divExemplo = document.getElementById('compExemplo');
@@ -666,7 +709,10 @@
             if(!item) return;
             const tempDiv = document.createElement("div");
             tempDiv.innerHTML = item.significado;
-            navigator.clipboard.writeText(`${item.palavra} = ${tempDiv.innerText}`).then(() => {
+            
+            const textoCopiado = tempDiv.innerText ? `${item.palavra} → ${tempDiv.innerText}` : `${item.palavra}`;
+            
+            navigator.clipboard.writeText(textoCopiado).then(() => {
                 const textoOriginal = btnElement.innerHTML;
                 btnElement.innerHTML = '✅ Copiado';
                 setTimeout(() => { btnElement.innerHTML = textoOriginal; }, 2000);
@@ -770,7 +816,6 @@
             }
         }
 
-        // A geração da Imagem renderiza tudo de forma perfeitamente harmoniosa
         function baixarImagem(row, btnElement) {
             const item = palavrasGlobais.find(i => i.row == row);
             if(!item) return;
@@ -802,11 +847,7 @@
             
             let htmlExemplo = '';
             if (item.exemplo && item.exemplo !== '-' && item.exemplo.trim() !== '') {
-                
                 let exFormatado = formatarExemploHTML(item.exemplo);
-                
-                // Mágica fina: Modifica apenas a bolinha para que ela fique com tamanho especial 
-                // e recuo (margin) na foto sem quebrar nenhuma outra formatação que você fez!
                 exFormatado = exFormatado.replace(/●/g, '<span style="color: #374151; font-size: 35px; margin-right: 15px;">●</span>');
 
                 htmlExemplo = `
