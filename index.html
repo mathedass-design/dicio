@@ -405,52 +405,68 @@
             '#f0e6ef', '#e4c1f9', '#d3f8e2', '#e4c1f9', '#f694c1', '#ede7b1', '#a9def9', '#e4f1ee', '#ffc8dd', '#ffafcc'
         ];
 
+        // Escape apenas para o input do Título da Palavra (por segurança)
         function escapeHTML(str) {
             if(!str) return '';
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // A MÁGICA FOI AQUI: Expandimos a lista de tags aceitas para garantir que o formato do celular e do PC funcionem igual
-        function processarTextoFinal(str) {
-            if(!str) return '';
-            let seguro = escapeHTML(str);
-            return seguro
-                .replace(/&lt;b&gt;/gi, '<b>').replace(/&lt;\/b&gt;/gi, '</b>')
-                .replace(/&lt;strong&gt;/gi, '<strong>').replace(/&lt;\/strong&gt;/gi, '</strong>')
-                .replace(/&lt;i&gt;/gi, '<i>').replace(/&lt;\/i&gt;/gi, '</i>')
-                .replace(/&lt;em&gt;/gi, '<em>').replace(/&lt;\/em&gt;/gi, '</em>')
-                .replace(/&lt;s&gt;/gi, '<s>').replace(/&lt;\/s&gt;/gi, '</s>')
-                .replace(/&lt;strike&gt;/gi, '<strike>').replace(/&lt;\/strike&gt;/gi, '</strike>')
-                .replace(/&lt;del&gt;/gi, '<del>').replace(/&lt;\/del&gt;/gi, '</del>')
-                .replace(/&lt;u&gt;/gi, '<u>').replace(/&lt;\/u&gt;/gi, '</u>')
-                .replace(/&lt;div&gt;/gi, '<div>').replace(/&lt;\/div&gt;/gi, '</div>')
-                .replace(/&lt;br\s*[\/]?&gt;/gi, '<br>');
-        }
-
-        function formatarFrase(str) {
-            if(!str) return '';
-            let t = str.trim();
-            if(t.length === 0) return '';
+        // MÁGICA: Novas funções robustas que auto-formatam as Letras Maiúsculas e o Ponto Final
+        // passando "por fora" das tags HTML, sem quebrar absolutamente nada da formatação do seu editor.
+        
+        function formatarSignificadoHTML(htmlStr) {
+            if (!htmlStr) return '';
             
-            t = t.replace(/^((?:<\w+>)*\s*)(.)/, function(match, tags, letra) {
+            // 1. Coloca a primeira letra em maiúscula ignorando tags de formatação invisíveis no início
+            htmlStr = htmlStr.replace(/^((?:<[^>]+>|\s|&nbsp;)*)([a-zA-ZáéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ])/i, function(match, tags, letra) {
                 return tags + letra.toUpperCase();
             });
-            
-            let textoSemTagFinal = t.replace(/(<\/\w+>)+$/, '');
-            if (!/[.!?]$/.test(textoSemTagFinal)) {
-                t = textoSemTagFinal + '.' + t.substring(textoSemTagFinal.length);
+
+            // 2. Coloca o ponto final garantindo que vai ficar exatamente no final da última letra visível (antes de fechar tags)
+            let trailing = '';
+            htmlStr = htmlStr.replace(/(?:\s|&nbsp;|<[^>]+>)+$/, function(match) {
+                trailing = match;
+                return '';
+            });
+
+            if (htmlStr.trim().length > 0 && !/[.!?]$/.test(htmlStr.replace(/&nbsp;/g, ' '))) {
+                htmlStr += '.';
             }
-            return t;
+            
+            htmlStr += trailing;
+            return htmlStr;
         }
 
-        function formatarExemploVisu(exRaw) {
-            if (!exRaw || exRaw === '-') return '';
-            return exRaw.split('\n')
-                .filter(l => l.trim() !== '')
-                .map(l => {
-                    let texto = l.trim().replace(/^[\*\-●]\s*/, '');
-                    return '● ' + formatarFrase(texto);
-                }).join('\n');
+        function formatarExemploHTML(htmlStr) {
+            if (!htmlStr || htmlStr === '-') return '';
+            
+            // Separa os parágrafos pela bolinha para formatar um por um
+            let lines = htmlStr.split('●');
+            
+            for (let i = 1; i < lines.length; i++) {
+                let line = lines[i];
+                
+                // Maiúscula na primeira letra de cada exemplo
+                line = line.replace(/^((?:<[^>]+>|\s|&nbsp;)*)([a-zA-ZáéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ])/i, function(match, tags, letra) {
+                    return tags + letra.toUpperCase();
+                });
+
+                // Ponto final isolado em cada exemplo
+                let trailing = '';
+                line = line.replace(/(?:\s|&nbsp;|<[^>]+>)+$/, function(match) {
+                    trailing = match;
+                    return '';
+                });
+
+                if (line.trim().length > 0 && !/[.!?]$/.test(line.replace(/&nbsp;/g, ' '))) {
+                    line += '.';
+                }
+                
+                line += trailing;
+                lines[i] = line;
+            }
+            
+            return lines.join('●');
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -481,6 +497,7 @@
                 }
             }
 
+            // Proteção para colar texto: remove formatações estranhas de outros sites
             function handlePaste(e) {
                 e.preventDefault();
                 let text = (e.originalEvent || e).clipboardData.getData('text/plain');
@@ -562,17 +579,15 @@
 
             document.getElementById('editRow').value = item.row;
             document.getElementById('editPalavra').value = item.palavra;
+            
+            // Atribuição limpa e crua do HTML salvo
             document.getElementById('editSignificado').innerHTML = item.significado;
             
             let oldEx = (item.exemplo === '-' || !item.exemplo) ? '' : item.exemplo;
-            if(oldEx !== '') {
-                oldEx = oldEx.split('\n').map(l => {
-                    let t = l.trim();
-                    if(t !== '' && t.indexOf('●') === -1) {
-                        t = '● ' + t.replace(/^[\*\-]\s*/, '');
-                    }
-                    return t;
-                }).join('\n');
+            if(oldEx !== '' && oldEx.indexOf('●') === -1) {
+                // Conversão apenas para notas super antigas que não tinham as bolinhas do novo editor
+                oldEx = oldEx.replace(/<[^>]*>?/gm, '');
+                oldEx = oldEx.split('\n').map(l => l.trim() !== '' ? '● ' + l.trim() : '').join('<br>');
             }
             document.getElementById('editExemplo').innerHTML = oldEx;
             
@@ -623,12 +638,13 @@
             document.getElementById('boxCompleto').style.backgroundColor = obterCorFixa(item.palavra);
             document.getElementById('compPalavra').innerText = item.palavra;
             
-            document.getElementById('compSignificado').innerHTML = processarTextoFinal(formatarFrase(item.significado));
+            // Aqui as funções de auto-maiuscula e ponto entram com maestria
+            document.getElementById('compSignificado').innerHTML = formatarSignificadoHTML(item.significado);
             
             const divExemplo = document.getElementById('compExemplo');
             if (item.exemplo && item.exemplo !== '-' && item.exemplo.trim() !== '') {
                 divExemplo.style.display = 'block'; 
-                divExemplo.innerHTML = processarTextoFinal(formatarExemploVisu(item.exemplo));
+                divExemplo.innerHTML = formatarExemploHTML(item.exemplo);
             } else {
                 divExemplo.style.display = 'none';
             }
@@ -698,20 +714,20 @@
                 
                 li.onclick = function() { abrirVisaoCompleta(item.row); };
 
-                let sigFormatado = formatarFrase(item.significado);
+                let sigFormatado = formatarSignificadoHTML(item.significado);
                 let temExemplo = (item.exemplo && item.exemplo.trim() !== '' && item.exemplo !== '-');
                 
                 let htmlExemplo = '';
                 if(temExemplo) {
-                    let exFormatado = formatarExemploVisu(item.exemplo);
-                    htmlExemplo = `<div class="card-exemplo">${processarTextoFinal(exFormatado)}</div>`;
+                    let exFormatado = formatarExemploHTML(item.exemplo);
+                    htmlExemplo = `<div class="card-exemplo">${exFormatado}</div>`;
                 }
 
                 li.innerHTML = `
                     <div class="card-header">
-                        <div class="card-palavra" title="${escapeHTML(item.palavra)}">${processarTextoFinal(item.palavra)}</div>
+                        <div class="card-palavra" title="${escapeHTML(item.palavra)}">${escapeHTML(item.palavra)}</div>
                     </div>
-                    <div class="card-significado">${processarTextoFinal(sigFormatado)}</div>
+                    <div class="card-significado">${sigFormatado}</div>
                     ${htmlExemplo}
                 `;
                 lista.appendChild(li);
@@ -754,6 +770,7 @@
             }
         }
 
+        // A geração da Imagem renderiza tudo de forma perfeitamente harmoniosa
         function baixarImagem(row, btnElement) {
             const item = palavrasGlobais.find(i => i.row == row);
             if(!item) return;
@@ -781,37 +798,28 @@
                 zIndex: '-1'
             });
 
-            let sigFormatado = formatarFrase(item.significado);
+            let sigFormatado = formatarSignificadoHTML(item.significado);
             
             let htmlExemplo = '';
             if (item.exemplo && item.exemplo !== '-' && item.exemplo.trim() !== '') {
-                const linhas = item.exemplo.split('\n').filter(l => l.trim() !== '');
                 
-                const linhasFormatadas = linhas.map((linha, index) => {
-                    let texto = linha.trim().replace(/^[\*\-●]\s*/, '');
-                    texto = formatarFrase(texto); 
-                    
-                    let marginBottom = (index === linhas.length - 1) ? '0' : '20px';
-                    
-                    return `
-                        <div style="display: flex; align-items: flex-start; gap: 20px; margin-bottom: ${marginBottom}; text-align: left;">
-                            <span style="color: #374151; font-size: 30px; line-height: 1.6; padding-top: 3px;">●</span>
-                            <span style="flex: 1;">${processarTextoFinal(texto)}</span>
-                        </div>
-                    `;
-                }).join('');
+                let exFormatado = formatarExemploHTML(item.exemplo);
+                
+                // Mágica fina: Modifica apenas a bolinha para que ela fique com tamanho especial 
+                // e recuo (margin) na foto sem quebrar nenhuma outra formatação que você fez!
+                exFormatado = exFormatado.replace(/●/g, '<span style="color: #374151; font-size: 35px; margin-right: 15px;">●</span>');
 
                 htmlExemplo = `
                     <div style="background: rgba(255,255,255,0.5); padding: 50px; border-radius: 30px; font-style: italic; font-size: 45px; color: #374151; line-height: 1.5; width: 100%; box-sizing: border-box;">
-                        ${linhasFormatadas}
+                        ${exFormatado}
                     </div>
                 `;
             }
 
             tempDiv.innerHTML = `
                 <div style="width: 100%; display: flex; flex-direction: column;">
-                    <div style="font-size: 110px; font-weight: 900; color: #111827; margin-bottom: 15px;">${processarTextoFinal(item.palavra)}</div>
-                    <div style="font-size: 55px; line-height: 1.5; color: #111827; margin-bottom: 50px;">${processarTextoFinal(sigFormatado)}</div>
+                    <div style="font-size: 110px; font-weight: 900; color: #111827; margin-bottom: 15px;">${escapeHTML(item.palavra)}</div>
+                    <div style="font-size: 55px; line-height: 1.5; color: #111827; margin-bottom: 50px;">${sigFormatado}</div>
                     ${htmlExemplo}
                 </div>
             `;
