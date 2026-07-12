@@ -63,7 +63,6 @@
         
         .header-app h1 { font-size: 24px; font-weight: 900; display: flex; align-items: center; gap: 10px;}
 
-        /* Estilo do Contador e Botão de Imprimir */
         .contador-cards {
             background: rgba(255, 255, 255, 0.25);
             border: 1px solid rgba(255, 255, 255, 0.4);
@@ -86,6 +85,13 @@
             display: flex; align-items: center; justify-content: center; transition: 0.2s;
         }
         .btn-imprimir:hover { background: rgba(255,255,255,0.4); }
+
+        .btn-leitura {
+            background: rgba(255,255,255,0.3); color: #ffffff; border: none;
+            height: 32px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s; padding: 0 12px; gap: 6px;
+        }
+        .btn-leitura:hover { background: rgba(255,255,255,0.5); }
 
         .centro-header { display: flex; justify-content: center; }
         .busca-box { 
@@ -121,12 +127,77 @@
         }
         .btn-tema:hover { background: rgba(255,255,255,0.4); }
 
-        .container {
+        .container, .container-leitura {
             width: 100%;
             max-width: 1600px; margin: 0 auto; padding: 20px;
-            display: grid; gap: 20px; grid-template-columns: 1fr;
+            display: grid; gap: 20px;
             flex-grow: 1; overflow: hidden; min-height: 0; 
         }
+
+        .container { grid-template-columns: 1fr; }
+        
+        /* MODO LEITURA ESTILOS */
+        .container-leitura {
+            display: none; grid-template-columns: 1fr; grid-template-rows: 1fr;
+        }
+        .card-leitura {
+            background: var(--branco); padding: 25px; border-radius: 20px; 
+            box-shadow: 0 5px 15px var(--sombra); transition: background 0.3s;
+            display: flex; flex-direction: column; overflow: hidden; width: 100%; height: 100%;
+        }
+        .card-leitura h2 { color: var(--primaria); margin-bottom: 20px; font-size: 20px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;}
+        
+        .controles-leitura { 
+            display: flex; align-items: center; justify-content: space-between; 
+            margin-bottom: 15px; flex-shrink: 0; flex-wrap: wrap; gap: 10px;
+        }
+        
+        .box-tamanho-fonte {
+            display: flex; gap: 8px; align-items: center; background: var(--input-bg); 
+            border: 2px solid var(--input-border); padding: 4px 10px; border-radius: 10px;
+        }
+
+        .resultado-leitura {
+            flex-grow: 1; overflow-y: auto; padding: 20px; border: 2px solid var(--input-border);
+            border-radius: 10px; background: var(--input-bg); font-size: 18px; line-height: 1.8; color: var(--texto);
+            white-space: pre-wrap; display: none; transition: font-size 0.2s;
+        }
+        .palavra-mapeada {
+            background-color: rgba(139, 92, 246, 0.15);
+            border-bottom: 2px dashed var(--primaria);
+            cursor: pointer; 
+            font-weight: bold;
+            color: var(--primaria);
+            transition: 0.2s;
+            border-radius: 3px;
+            padding: 0 2px;
+        }
+        body.dark-mode .palavra-mapeada { background-color: rgba(139, 92, 246, 0.3); color: #a78bfa; }
+        .palavra-mapeada:hover { background-color: rgba(139, 92, 246, 0.4); }
+
+        #tooltipLeitura {
+            position: fixed; background: #1f2937; color: #ffffff; padding: 15px;
+            border-radius: 12px; font-size: 14px; max-width: 300px; z-index: 2000;
+            display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.3); pointer-events: none;
+            line-height: 1.5; border: 1px solid rgba(255,255,255,0.1);
+        }
+        body.dark-mode #tooltipLeitura { background: #cbd5e1; color: #0f172a; border-color: rgba(0,0,0,0.1); }
+
+        .btn-add-selecao {
+            position: fixed; background: var(--primaria); color: white; padding: 8px 12px; border-radius: 8px;
+            font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: none; z-index: 1500; border: none; align-items: center; gap: 5px; transition: transform 0.1s;
+        }
+        .btn-add-selecao:hover { transform: scale(1.05); background: var(--primaria-hover); }
+
+        #toastNotificacao {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #10b981; color: #ffffff; padding: 12px 24px; border-radius: 50px;
+            font-weight: bold; font-size: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 3000; display: none; transition: opacity 0.3s;
+        }
+
+        /* FIM MODO LEITURA */
 
         .card-add { 
             background: var(--branco); padding: 25px; border-radius: 20px; 
@@ -140,10 +211,10 @@
             margin-bottom: 15px; overflow: hidden;
         }
 
-        .div-editor::-webkit-scrollbar { width: 6px; }
-        .div-editor::-webkit-scrollbar-track { background: transparent; }
-        .div-editor::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        body.dark-mode .div-editor::-webkit-scrollbar-thumb { background: #475569; }
+        .div-editor::-webkit-scrollbar, .resultado-leitura::-webkit-scrollbar { width: 6px; }
+        .div-editor::-webkit-scrollbar-track, .resultado-leitura::-webkit-scrollbar-track { background: transparent; }
+        .div-editor::-webkit-scrollbar-thumb, .resultado-leitura::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        body.dark-mode .div-editor::-webkit-scrollbar-thumb, body.dark-mode .resultado-leitura::-webkit-scrollbar-thumb { background: #475569; }
         
         .toolbar-formato {
             display: flex; gap: 8px; background: var(--input-bg); border: 2px solid var(--input-border);
@@ -191,70 +262,31 @@
         button.btn-add:hover { background: var(--primaria-hover); }
 
         .fab-container {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            display: flex;
-            gap: 15px;
-            z-index: 900;
+            position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 900;
         }
         .btn-flutuante {
-            background: var(--primaria);
-            color: #ffffff;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 18px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            cursor: pointer;
-            display: none; 
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s, background 0.2s;
+            background: var(--primaria); color: #ffffff; border: none; width: 50px; height: 50px;
+            border-radius: 50%; font-size: 18px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            cursor: pointer; display: none; align-items: center; justify-content: center; transition: 0.2s;
         }
-        .btn-flutuante:hover {
-            transform: scale(1.1);
-            background: var(--primaria-hover);
-        }
-        body.dark-mode .btn-flutuante {
-            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
-        }
+        .btn-flutuante:hover { transform: scale(1.1); background: var(--primaria-hover); }
+        body.dark-mode .btn-flutuante { box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
 
-        mark.highlight {
-            background-color: #fef08a; 
-            color: #1f2937;
-            border-radius: 4px;
-            padding: 0 2px;
-            box-shadow: 0 0 2px rgba(0,0,0,0.1);
-            font-weight: bold;
-        }
-        body.dark-mode mark.highlight {
-            background-color: #ca8a04; 
-            color: #ffffff;
-        }
+        mark.highlight { background-color: #fef08a; color: #1f2937; border-radius: 4px; padding: 0 2px; font-weight: bold; }
+        body.dark-mode mark.highlight { background-color: #ca8a04; color: #ffffff; }
 
         @media (min-width: 900px) {
-            .container { 
-                grid-template-columns: 320px 1fr; 
-                grid-template-rows: 1fr; 
-                align-items: stretch; 
-            }
+            .container { grid-template-columns: 320px 1fr; grid-template-rows: 1fr; align-items: stretch; }
             .card-add { height: 100%; } 
             
             #significado, #exemplo { flex: 1 1 0; min-height: 0; }
             #exemplo { margin-bottom: 0; }
 
-            .painel-lista-wrapper { 
-                width: 100%; height: 100%; overflow: hidden; 
-                display: flex; flex-direction: column; 
-            }
+            .painel-lista-wrapper { width: 100%; height: 100%; overflow: hidden; display: flex; flex-direction: column; }
             
             .grid-view { 
-                display: grid; gap: 20px; flex-grow: 1; 
-                width: 100%; height: 100%; 
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-                grid-template-rows: repeat(3, minmax(0, 1fr)); 
+                display: grid; gap: 20px; flex-grow: 1; width: 100%; height: 100%; 
+                grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); 
             }
         }
 
@@ -266,51 +298,31 @@
             height: 100%; overflow: hidden; cursor: pointer; justify-content: flex-start;
         }
         .grid-view .card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
-        
         .empty-card { background: transparent !important; box-shadow: none !important; border: none !important; }
 
-        .card-header { 
-            display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 10px; flex-shrink: 0; 
-        }
-        
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 10px; flex-shrink: 0; }
         .card-palavra { font-size: 20px; font-weight: 900; color: #111827; word-break: break-word; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        
-        .cb-selecao {
-            width: 18px; height: 18px; cursor: pointer; accent-color: var(--primaria); flex-shrink: 0;
-        }
+        .cb-selecao { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primaria); flex-shrink: 0; }
 
         .card-significado { 
             font-size: 15px; color: #374151; margin-bottom: 10px; line-height: 1.4; 
             overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; flex-shrink: 0; 
         }
-        
         .card-significado * { display: inline !important; }
 
         .card-exemplo {
-            background: rgba(255,255,255,0.5); padding: 10px; border-radius: 10px;
-            font-style: italic; color: #374151; font-size: 13px;
-            overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-            white-space: pre-wrap; flex-shrink: 0; 
+            background: rgba(255,255,255,0.5); padding: 10px; border-radius: 10px; font-style: italic; color: #374151; font-size: 13px;
+            overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; white-space: pre-wrap; flex-shrink: 0; 
         }
 
         .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px;
         }
         .modal-box {
             position: relative; background: var(--branco); padding: 30px; border-radius: 20px; width: 100%; max-width: 500px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: hidden; transition: background 0.3s;
-            display: flex; flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: hidden; transition: background 0.3s; display: flex; flex-direction: column;
         }
-
-        /* AJUSTE: Scroll apenas na div de inputs do modal de edição */
-        .modal-box .inputs-container {
-            overflow-y: auto;
-            min-height: 0;
-            flex-shrink: 1;
-            padding-right: 5px;
-            margin-bottom: 15px;
-        }
+        .modal-box .inputs-container { overflow-y: auto; min-height: 0; flex-shrink: 1; padding-right: 5px; margin-bottom: 15px; }
         .modal-box .inputs-container::-webkit-scrollbar { width: 6px; }
         .modal-box .inputs-container::-webkit-scrollbar-track { background: transparent; }
         .modal-box .inputs-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -319,20 +331,13 @@
         #editSignificado, #editExemplo { min-height: 100px; height: auto; }
 
         .btn-fechar-x {
-            position: absolute; top: 15px; right: 15px;
-            background: rgba(0,0,0,0.05); color: var(--texto); border: none;
-            width: 32px; height: 32px; border-radius: 50%;
-            font-size: 16px; font-weight: bold; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+            position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.05); color: var(--texto); border: none; width: 32px; height: 32px; border-radius: 50%;
+            font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;
         }
         .btn-fechar-x:hover { background: #ef4444; color: #ffffff; }
 
         .modal-box h3 { margin-bottom: 20px; color: var(--primaria); margin-right: 30px; flex-shrink: 0;} 
-        .btn-cancelar {
-            width: 100%; background: var(--input-border); color: var(--texto); border: none;
-            padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.3s;
-            flex-shrink: 0;
-        }
+        .btn-cancelar { width: 100%; background: var(--input-border); color: var(--texto); border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.3s; flex-shrink: 0; }
         .btn-cancelar:hover { opacity: 0.8; }
 
         .comp-palavra { font-size: 26px; font-weight: 900; margin-bottom: 15px; color: #111827; margin-right: 30px;}
@@ -341,76 +346,36 @@
 
         .card-acoes { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
         .btn-acao {
-            background: rgba(0,0,0,0.1); border: none; padding: 10px 15px;
-            border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; color: #111827;
+            background: rgba(0,0,0,0.1); border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; color: #111827;
             transition: background 0.2s; display: flex; align-items: center; gap: 4px;
         }
         .btn-acao:hover { background: rgba(0,0,0,0.2); }
 
-        /* AREA DE IMPRESSÃO - INVISÍVEL NO USO NORMAL */
         #areaImpressao { display: none; }
 
         @media (max-width: 899px) {
             body { overflow-y: auto; height: auto; }
             .header-app { display: flex; flex-direction: column; padding: 15px 20px; gap: 15px; }
-            .header-esq { justify-content: center; width: 100%; }
+            .header-esq { justify-content: center; width: 100%; flex-wrap: wrap;}
             .acoes-topo { justify-content: center; flex-wrap: wrap; }
-            .card-add { height: auto; max-height: none;}
+            .card-add, .card-leitura { height: auto; max-height: none;}
             #significado, #exemplo { min-height: 120px; }
             .painel-lista-wrapper { overflow: visible; height: auto; }
-            .grid-view { 
-                display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-                grid-auto-rows: min-content; height: auto; gap: 15px;
-            }
+            .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); grid-auto-rows: min-content; height: auto; gap: 15px; }
             .empty-card { display: none !important; }
             .fab-container { bottom: 20px; right: 20px; gap: 10px; }
             .btn-flutuante { width: 45px; height: 45px; font-size: 16px; }
+            #inputTextoLeitura { min-height: 250px; }
+            .controles-leitura { justify-content: center; }
         }
 
-        /* REGRAS ESPECÍFICAS PARA IMPRESSÃO/PDF */
         @media print {
-            body {
-                background: white !important;
-                color: black !important;
-                overflow: visible !important;
-                height: auto !important;
-            }
-            
-            /* Esconde tudo da interface do site */
-            .header-app, .container, .fab-container, .modal-overlay {
-                display: none !important;
-            }
-            
-            /* Exibe apenas a área de impressão */
-            #areaImpressao {
-                display: block !important;
-                width: 100%;
-                max-width: 850px; /* Mantém centralizado e limpo */
-                margin: 0 auto;
-                font-family: 'Nunito', sans-serif;
-            }
-            
-            /* Margens seguras de papel A4 */
-            @page {
-                margin: 20mm;
-                size: A4;
-            }
-            
-            /* Estilo dos itens na página de impressão */
-            .print-item {
-                margin-bottom: 24px;
-                font-size: 16px;
-                line-height: 1.6;
-                color: black;
-                page-break-inside: avoid; /* Evita que uma palavra seja cortada no meio entre as páginas */
-            }
-            
-            .print-item strong {
-                font-weight: 900;
-                font-size: 17px;
-            }
-            
-            /* Remove fundos de destaques na impressão */
+            body { background: white !important; color: black !important; overflow: visible !important; height: auto !important; }
+            .header-app, .container, .container-leitura, .fab-container, .modal-overlay, #btnAddSelecao, #tooltipLeitura, #toastNotificacao { display: none !important; }
+            #areaImpressao { display: block !important; width: 100%; max-width: 850px; margin: 0 auto; font-family: 'Nunito', sans-serif; }
+            @page { margin: 20mm; size: A4; }
+            .print-item { margin-bottom: 24px; font-size: 16px; line-height: 1.6; color: black; page-break-inside: avoid; }
+            .print-item strong { font-weight: 900; font-size: 17px; }
             mark.highlight { background: transparent !important; color: black !important; font-weight: inherit !important; }
         }
     </style>
@@ -428,11 +393,11 @@
             <h1>☁️ Dicionário</h1>
             <div class="contador-cards" id="contadorCards" title="Total de cards">0</div>
             
-            <!-- NOVOS BOTÕES DE SELEÇÃO E CÓPIA -->
             <button class="btn-imprimir" id="btnToggleSelection" onclick="toggleSelectionMode()" title="Selecionar Palavras">☑️</button>
             <button class="btn-imprimir" id="btnCopySelected" onclick="copiarSelecionados()" style="display:none; background: #10b981;" title="Copiar Selecionados">📋</button>
-            
             <button class="btn-imprimir" onclick="imprimirDicionario()" title="Imprimir Dicionário">🖨️</button>
+            
+            <button class="btn-leitura" id="btnAlternarModo" onclick="alternarModoVisao()">📖 Mapeamento</button>
         </div>
         
         <div class="centro-header">
@@ -449,7 +414,7 @@
         </div>
     </header>
 
-    <div class="container">
+    <div class="container" id="containerDicionario">
         <div class="card-add">
             <h2>✨ Qual a nova?</h2>
             
@@ -475,6 +440,32 @@
             <ul id="minhaLista" class="grid-view"></ul>
         </div>
     </div>
+
+    <div class="container-leitura" id="containerLeitura">
+        <div class="card-leitura">
+            <h2>📖 Leitura e Mapeamento Inteligente</h2>
+            <div class="controles-leitura">
+                
+                <div class="box-tamanho-fonte">
+                    <span style="font-size: 14px; font-weight: bold; color: var(--texto);">Zoom:</span>
+                    <button class="btn-acao" style="padding: 2px 8px; font-size: 16px;" onclick="alterarTamanhoFonteLeitura(-2)">A-</button>
+                    <button class="btn-acao" style="padding: 2px 8px; font-size: 16px;" onclick="alterarTamanhoFonteLeitura(2)">A+</button>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-left: auto;">
+                    <button class="btn-acao" id="btnEditarTexto" onclick="iniciarEdicaoTexto()" style="display: none;">✏️ Editar Texto</button>
+                    <button class="btn-acao" id="btnMapearTexto" style="background: var(--primaria); color: white;" onclick="processarMapeamentoTexto()">🔍 Mapear Palavras</button>
+                </div>
+            </div>
+            
+            <textarea id="inputTextoLeitura" class="campo div-editor" style="flex-grow: 1; resize: none; margin-bottom: 0;" placeholder="Cole aqui seu texto, artigo ou ementa para mapear as palavras do seu dicionário..."></textarea>
+            <div id="resultadoLeitura" class="resultado-leitura"></div>
+        </div>
+    </div>
+
+    <div id="tooltipLeitura"></div>
+    <div id="toastNotificacao"></div>
+    <button id="btnAddSelecao" class="btn-add-selecao" onclick="adicionarPalavraSilenciosa()">➕ Adicionar ao Dicionário</button>
 
     <div class="fab-container" id="fabPaginacao">
         <button class="btn-flutuante" id="fabPrev" onclick="mudarPagina(-1)" title="Página Anterior">&#10094;</button>
@@ -513,7 +504,6 @@
             <div class="comp-palavra" id="compPalavra"></div>
             <div class="comp-significado" id="compSignificado"></div>
             <div class="comp-exemplo" id="compExemplo"></div>
-            
             <div id="compAcoes" class="card-acoes" style="margin-top: 25px; margin-bottom: 10px;"></div>
         </div>
     </div>
@@ -526,10 +516,10 @@
         let palavrasGlobais = [];
         let paginaAtual = 1;
         const itensPorPagina = 9;
-
-        // Variaveis para a nova função de seleção e cópia
         let isSelectionMode = false;
         let selectedWords = new Set();
+        let isModoLeitura = false;
+        let tamanhoFonteLeitura = 18;
 
         const paletaCores = [
             '#fbf8cc', '#fde4cf', '#ffcfd2', '#f1c0e8', '#cfbaf0', '#a3c4f3', '#90dbf4', '#8eecf5', '#98f5e1', '#b9fbc0',
@@ -541,236 +531,7 @@
 
         function atualizarContador() {
             const contador = document.getElementById('contadorCards');
-            if(contador) {
-                contador.innerText = palavrasGlobais.length;
-            }
-        }
-
-        function imprimirDicionario() {
-            if(palavrasGlobais.length === 0) {
-                alert("Nenhuma palavra para imprimir.");
-                return;
-            }
-
-            const area = document.getElementById('areaImpressao');
-            area.innerHTML = ''; 
-
-            const palavrasOrdenadas = [...palavrasGlobais].sort((a, b) => a.palavra.localeCompare(b.palavra));
-
-            palavrasOrdenadas.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'print-item';
-                
-                let sigLimpo = formatarSignificadoHTML(item.significado);
-                div.innerHTML = `<strong>${escapeHTML(item.palavra)}:</strong> ${sigLimpo}`;
-                
-                area.appendChild(div);
-            });
-
-            window.print();
-        }
-
-        // Funções de Seleção Múltipla
-        function toggleSelectionMode() {
-            isSelectionMode = !isSelectionMode;
-            selectedWords.clear();
-            
-            document.getElementById('btnCopySelected').style.display = isSelectionMode ? 'flex' : 'none';
-            document.getElementById('btnToggleSelection').style.background = isSelectionMode ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.2)';
-            
-            filtrarLista(); 
-        }
-
-        function toggleWordSelection(row, checkboxElement) {
-            if(selectedWords.has(row)) {
-                selectedWords.delete(row);
-                if(checkboxElement) checkboxElement.checked = false;
-            } else {
-                selectedWords.add(row);
-                if(checkboxElement) checkboxElement.checked = true;
-            }
-        }
-
-        function copiarSelecionados() {
-            if(selectedWords.size === 0) {
-                alert("Nenhuma palavra selecionada.");
-                return;
-            }
-            
-            const palavrasParaCopiar = palavrasGlobais
-                .filter(p => selectedWords.has(p.row))
-                .map(p => p.palavra);
-                
-            const texto = palavrasParaCopiar.join(', ');
-            
-            navigator.clipboard.writeText(texto).then(() => {
-                toggleSelectionMode(); 
-                
-                const btnToggle = document.getElementById('btnToggleSelection');
-                const oldText = btnToggle.innerText;
-                btnToggle.innerText = '✅';
-                setTimeout(() => { btnToggle.innerText = oldText; }, 2000);
-            });
-        }
-
-        function escapeRegExp(string) {
-            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
-
-        function destacarTexto(html, busca) {
-            if (!busca || busca.trim() === '') return html;
-            const termoEscapado = escapeRegExp(busca.trim());
-            const regex = new RegExp(`(${termoEscapado})(?![^<]*>)`, 'gi');
-            return html.replace(regex, '<mark class="highlight">$1</mark>');
-        }
-
-        function inserirSeta(e) {
-            e.preventDefault(); 
-            const sel = window.getSelection();
-            if (!sel.rangeCount) return;
-            
-            let textToInsert = ' → '; 
-            
-            const node = sel.focusNode;
-            const offset = sel.focusOffset;
-            
-            if (node && node.nodeType === 3 && offset > 0) {
-                const charAntes = node.textContent.charAt(offset - 1);
-                if (charAntes === ' ' || charAntes === '\u00A0') {
-                    textToInsert = '→ '; 
-                }
-            }
-            
-            document.execCommand('insertText', false, textToInsert);
-        }
-
-        function escapeHTML(str) {
-            if(!str) return '';
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-        
-        function formatarSignificadoHTML(htmlStr) {
-            if (!htmlStr) return '';
-            htmlStr = htmlStr.replace(/^((?:<[^>]+>|\s|&nbsp;)*)([a-zA-ZáéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ])/i, function(match, tags, letra) {
-                return tags + letra.toUpperCase();
-            });
-
-            let trailing = '';
-            htmlStr = htmlStr.replace(/(?:\s|&nbsp;|<[^>]+>)+$/, function(match) {
-                trailing = match;
-                return '';
-            });
-
-            if (htmlStr.trim().length > 0 && !/[.!?]$/.test(htmlStr.replace(/&nbsp;/g, ' '))) {
-                htmlStr += '.';
-            }
-            
-            htmlStr += trailing;
-            return htmlStr;
-        }
-
-        function formatarExemploHTML(htmlStr) {
-            if (!htmlStr || htmlStr === '-') return '';
-            let lines = htmlStr.split('●');
-            
-            for (let i = 1; i < lines.length; i++) {
-                let line = lines[i];
-                
-                line = line.replace(/^((?:<[^>]+>|\s|&nbsp;)*)([a-zA-ZáéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ])/i, function(match, tags, letra) {
-                    return tags + letra.toUpperCase();
-                });
-
-                let trailing = '';
-                line = line.replace(/(?:\s|&nbsp;|<[^>]+>)+$/, function(match) {
-                    trailing = match;
-                    return '';
-                });
-
-                if (line.trim().length > 0 && !/[.!?]$/.test(line.replace(/&nbsp;/g, ' '))) {
-                    line += '.';
-                }
-                
-                line += trailing;
-                lines[i] = line;
-            }
-            
-            return lines.join('●');
-        }
-
-        function toggleLimparBusca() {
-            const btn = document.getElementById('btnLimparBusca');
-            if (document.getElementById('campoBusca').value.length > 0) {
-                btn.style.display = 'block';
-            } else {
-                btn.style.display = 'none';
-            }
-        }
-        
-        function limparBusca() {
-            document.getElementById('campoBusca').value = '';
-            toggleLimparBusca();
-            filtrarLista();
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            if(localStorage.getItem('temaNoturno') === 'true') {
-                document.body.classList.add('dark-mode');
-            }
-            carregarDaNuvem();
-
-            const txtExemplo = document.getElementById('exemplo');
-            const txtEditExemplo = document.getElementById('editExemplo');
-
-            function handleEnterBolinha(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    document.execCommand('insertText', false, '\n● ');
-                }
-            }
-            
-            function handleFocusBolinha() {
-                if (this.innerText.trim() === '') {
-                    this.innerHTML = '● ';
-                    let range = document.createRange();
-                    let sel = window.getSelection();
-                    range.selectNodeContents(this);
-                    range.collapse(false);
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                }
-            }
-
-            function handlePaste(e) {
-                e.preventDefault();
-                let text = (e.originalEvent || e).clipboardData.getData('text/plain');
-                document.execCommand('insertText', false, text);
-            }
-
-            [txtExemplo, txtEditExemplo].forEach(el => {
-                if(el) {
-                    el.addEventListener('keydown', handleEnterBolinha);
-                    el.addEventListener('focus', handleFocusBolinha);
-                    el.addEventListener('paste', handlePaste);
-                }
-            });
-
-            const txtSig = document.getElementById('significado');
-            const txtEditSig = document.getElementById('editSignificado');
-            [txtSig, txtEditSig].forEach(el => {
-                if(el) el.addEventListener('paste', handlePaste);
-            });
-        });
-
-        function toggleTema() {
-            const isDark = document.body.classList.toggle('dark-mode');
-            document.getElementById('btnTema').innerText = isDark ? '☀️' : '🌙';
-            localStorage.setItem('temaNoturno', isDark);
-        }
-
-        function obterCorFixa(palavra) {
-            let hash = 0;
-            for (let i = 0; i < palavra.length; i++) hash = palavra.charCodeAt(i) + ((hash << 5) - hash);
-            return paletaCores[Math.abs(hash) % paletaCores.length];
+            if(contador) contador.innerText = palavrasGlobais.length;
         }
 
         function salvarNaNuvem() {
@@ -779,7 +540,6 @@
             const ex = document.getElementById('exemplo').innerHTML.trim();
 
             if(!pal) return alert("Preencha a palavra!");
-            
             pal = pal.charAt(0).toUpperCase() + pal.slice(1);
 
             const idTemporario = "temp-" + Date.now();
@@ -820,6 +580,352 @@
             });
         }
 
+        function mostrarToast(mensagem) {
+            const toast = document.getElementById('toastNotificacao');
+            toast.innerText = mensagem;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3500);
+        }
+
+        function alternarModoVisao() {
+            isModoLeitura = !isModoLeitura;
+            const btn = document.getElementById('btnAlternarModo');
+            const boxBusca = document.querySelector('.centro-header');
+            const acoesTopo = document.querySelector('.acoes-topo');
+            
+            if(isModoLeitura) {
+                document.getElementById('containerDicionario').style.display = 'none';
+                document.getElementById('containerLeitura').style.display = 'flex';
+                btn.innerHTML = '🗂️ Dicionário';
+                btn.style.background = '#10b981'; 
+                boxBusca.style.visibility = 'hidden';
+                if(window.innerWidth > 899) acoesTopo.style.visibility = 'hidden';
+            } else {
+                document.getElementById('containerDicionario').style.display = 'grid';
+                document.getElementById('containerLeitura').style.display = 'none';
+                btn.innerHTML = '📖 Mapeamento';
+                btn.style.background = 'rgba(255,255,255,0.3)';
+                boxBusca.style.visibility = 'visible';
+                acoesTopo.style.visibility = 'visible';
+            }
+        }
+
+        function iniciarEdicaoTexto() {
+            document.getElementById('resultadoLeitura').style.display = 'none';
+            document.getElementById('inputTextoLeitura').style.display = 'block';
+            document.getElementById('btnEditarTexto').style.display = 'none';
+            document.getElementById('btnMapearTexto').style.display = 'flex';
+        }
+
+        function alterarTamanhoFonteLeitura(delta) {
+            tamanhoFonteLeitura += delta;
+            if(tamanhoFonteLeitura < 12) tamanhoFonteLeitura = 12;
+            if(tamanhoFonteLeitura > 45) tamanhoFonteLeitura = 45;
+            
+            document.getElementById('resultadoLeitura').style.fontSize = tamanhoFonteLeitura + 'px';
+            document.getElementById('inputTextoLeitura').style.fontSize = tamanhoFonteLeitura + 'px';
+        }
+
+        function processarMapeamentoTexto() {
+            let texto = document.getElementById('inputTextoLeitura').value;
+            if(!texto.trim()) return alert("Cole um texto primeiro para mapear!");
+
+            document.getElementById('inputTextoLeitura').style.display = 'none';
+            document.getElementById('btnMapearTexto').style.display = 'none';
+            document.getElementById('btnEditarTexto').style.display = 'flex';
+            
+            const resultadoDiv = document.getElementById('resultadoLeitura');
+            resultadoDiv.style.display = 'block';
+            
+            let htmlTexto = escapeHTML(texto).replace(/\n/g, '<br>');
+
+            const palavrasOrdenadas = [...palavrasGlobais].sort((a, b) => b.palavra.length - a.palavra.length);
+
+            palavrasOrdenadas.forEach(item => {
+                if(!item.palavra) return;
+                const termoEscapado = escapeRegExp(item.palavra.trim());
+                const regex = new RegExp(`(^|[^a-zA-ZáéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ])(${termoEscapado})(?=[^a-zA-ZáéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ]|$)`, 'gi');
+                
+                // Salva a palavra em minúsculas e escapada no data-attribute para evitar conflitos de ID (Number x String)
+                const palavraLimpa = escapeHTML(item.palavra.toLowerCase());
+                htmlTexto = htmlTexto.replace(regex, `$1<span class="palavra-mapeada" data-palavra="${palavraLimpa}">$2</span>`);
+            });
+
+            resultadoDiv.innerHTML = htmlTexto;
+        }
+
+        // --- SISTEMA DE CLIQUE NO BALÃO ---
+        document.addEventListener('click', function(e) {
+            const tooltip = document.getElementById('tooltipLeitura');
+
+            if(e.target && e.target.classList && e.target.classList.contains('palavra-mapeada')) {
+                const palavraAttr = e.target.getAttribute('data-palavra');
+                
+                // Busca a palavra exata usando o nome, não o ID
+                const item = palavrasGlobais.find(i => i.palavra && escapeHTML(i.palavra.toLowerCase()) === palavraAttr);
+                
+                if(!item) return;
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = item.significado;
+
+                tooltip.innerHTML = `<strong style="font-size: 16px; color: var(--primaria); margin-bottom: 5px; display: block;">${escapeHTML(item.palavra)}</strong><span style="opacity: 0.9;">${tempDiv.innerText}</span>`;
+                tooltip.style.display = 'block';
+
+                let x = e.clientX + 10;
+                let y = e.clientY + 15;
+
+                if(x + tooltip.offsetWidth > window.innerWidth) x = window.innerWidth - tooltip.offsetWidth - 10;
+                if(y + tooltip.offsetHeight > window.innerHeight) y = e.clientY - tooltip.offsetHeight - 15;
+
+                tooltip.style.left = x + 'px';
+                tooltip.style.top = y + 'px';
+            } else if (tooltip.style.display === 'block') {
+                tooltip.style.display = 'none';
+            }
+        });
+
+        // --- SISTEMA DE SELEÇÃO E ADIÇÃO ---
+        document.addEventListener('selectionchange', () => {
+            if(!isModoLeitura) return;
+            
+            const sel = window.getSelection();
+            const text = sel.toString().trim();
+            const btn = document.getElementById('btnAddSelecao');
+
+            if(text.length > 0 && text.length <= 60 && document.getElementById('resultadoLeitura').style.display === 'block') {
+                
+                let node = sel.anchorNode;
+                let isMapped = false;
+                while(node && node !== document.body) {
+                    if(node.classList && node.classList.contains('palavra-mapeada')) {
+                        isMapped = true; 
+                        break;
+                    }
+                    node = node.parentNode;
+                }
+
+                if(!isMapped) {
+                    const range = sel.getRangeAt(0);
+                    const rect = range.getBoundingClientRect();
+                    
+                    btn.style.left = `${rect.left + (rect.width / 2) - (btn.offsetWidth / 2)}px`;
+                    btn.style.top = `${rect.top - 45}px`;
+                    btn.style.display = 'flex';
+                    btn.setAttribute('data-palavra', text);
+                    return;
+                }
+            }
+            
+            btn.style.display = 'none';
+        });
+
+        function adicionarPalavraSilenciosa() {
+            const btn = document.getElementById('btnAddSelecao');
+            let palavraSelecionada = btn.getAttribute('data-palavra');
+            if(!palavraSelecionada) return;
+            
+            palavraSelecionada = palavraSelecionada.replace(/^[.,;:!?(){}\[\]"'*]+|[.,;:!?(){}\[\]"'*]+$/g, '').trim();
+
+            btn.style.display = 'none';
+            window.getSelection().removeAllRanges();
+            
+            if(!palavraSelecionada) return;
+
+            palavraSelecionada = palavraSelecionada.charAt(0).toUpperCase() + palavraSelecionada.slice(1);
+
+            if (palavrasGlobais.some(p => p.palavra.toLowerCase() === palavraSelecionada.toLowerCase())) {
+                mostrarToast('Esta palavra já está no seu dicionário!');
+                return;
+            }
+
+            const idTemporario = "temp-" + Date.now();
+            const placeholderSig = "Pendente de edição...";
+            
+            palavrasGlobais.unshift({ row: idTemporario, palavra: palavraSelecionada, significado: placeholderSig, exemplo: "-" });
+            
+            atualizarContador();
+            
+            processarMapeamentoTexto(); 
+
+            const url = `${GOOGLE_APP_URL}?action=salvar&palavra=${encodeURIComponent(palavraSelecionada)}&significado=${encodeURIComponent(placeholderSig)}&exemplo=${encodeURIComponent("-")}`;
+            fetch(url).then(r => r.json()).then(() => { carregarDaNuvemBaixoPano(); });
+
+            mostrarToast(`"${palavraSelecionada}" adicionada! Edite depois no painel.`);
+        }
+
+
+        // --- FUNÇÕES GERAIS ---
+        function imprimirDicionario() {
+            if(palavrasGlobais.length === 0) {
+                alert("Nenhuma palavra para imprimir.");
+                return;
+            }
+            const area = document.getElementById('areaImpressao');
+            area.innerHTML = ''; 
+            const palavrasOrdenadas = [...palavrasGlobais].sort((a, b) => a.palavra.localeCompare(b.palavra));
+
+            palavrasOrdenadas.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'print-item';
+                let sigLimpo = formatarSignificadoHTML(item.significado);
+                div.innerHTML = `<strong>${escapeHTML(item.palavra)}:</strong> ${sigLimpo}`;
+                area.appendChild(div);
+            });
+            window.print();
+        }
+
+        function toggleSelectionMode() {
+            isSelectionMode = !isSelectionMode;
+            selectedWords.clear();
+            
+            document.getElementById('btnCopySelected').style.display = isSelectionMode ? 'flex' : 'none';
+            document.getElementById('btnToggleSelection').style.background = isSelectionMode ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.2)';
+            filtrarLista(); 
+        }
+
+        function toggleWordSelection(row, checkboxElement) {
+            if(selectedWords.has(row)) {
+                selectedWords.delete(row);
+                if(checkboxElement) checkboxElement.checked = false;
+            } else {
+                selectedWords.add(row);
+                if(checkboxElement) checkboxElement.checked = true;
+            }
+        }
+
+        function copiarSelecionados() {
+            if(selectedWords.size === 0) return alert("Nenhuma palavra selecionada.");
+            
+            const palavrasParaCopiar = palavrasGlobais
+                .filter(p => selectedWords.has(p.row))
+                .map(p => p.palavra);
+                
+            const texto = palavrasParaCopiar.join(', ');
+            
+            navigator.clipboard.writeText(texto).then(() => {
+                toggleSelectionMode(); 
+                const btnToggle = document.getElementById('btnToggleSelection');
+                const oldText = btnToggle.innerText;
+                btnToggle.innerText = '✅';
+                setTimeout(() => { btnToggle.innerText = oldText; }, 2000);
+            });
+        }
+
+        function escapeRegExp(string) { return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+        function destacarTexto(html, busca) {
+            if (!busca || busca.trim() === '') return html;
+            const termoEscapado = escapeRegExp(busca.trim());
+            const regex = new RegExp(`(${termoEscapado})(?![^<]*>)`, 'gi');
+            return html.replace(regex, '<mark class="highlight">$1</mark>');
+        }
+
+        function inserirSeta(e) {
+            e.preventDefault(); 
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            
+            let textToInsert = ' → '; 
+            const node = sel.focusNode;
+            const offset = sel.focusOffset;
+            
+            if (node && node.nodeType === 3 && offset > 0) {
+                const charAntes = node.textContent.charAt(offset - 1);
+                if (charAntes === ' ' || charAntes === '\u00A0') textToInsert = '→ '; 
+            }
+            document.execCommand('insertText', false, textToInsert);
+        }
+
+        function escapeHTML(str) {
+            if(!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+        
+        function formatarSignificadoHTML(htmlStr) {
+            if (!htmlStr) return '';
+            htmlStr = htmlStr.replace(/^((?:<[^>]+>|\s|&nbsp;)*)([a-zA-ZáéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ])/i, function(match, tags, letra) { return tags + letra.toUpperCase(); });
+            let trailing = '';
+            htmlStr = htmlStr.replace(/(?:\s|&nbsp;|<[^>]+>)+$/, function(match) { trailing = match; return ''; });
+            if (htmlStr.trim().length > 0 && !/[.!?]$/.test(htmlStr.replace(/&nbsp;/g, ' '))) htmlStr += '.';
+            htmlStr += trailing;
+            return htmlStr;
+        }
+
+        function formatarExemploHTML(htmlStr) {
+            if (!htmlStr || htmlStr === '-') return '';
+            let lines = htmlStr.split('●');
+            for (let i = 1; i < lines.length; i++) {
+                let line = lines[i];
+                line = line.replace(/^((?:<[^>]+>|\s|&nbsp;)*)([a-zA-ZáéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ])/i, function(match, tags, letra) { return tags + letra.toUpperCase(); });
+                let trailing = '';
+                line = line.replace(/(?:\s|&nbsp;|<[^>]+>)+$/, function(match) { trailing = match; return ''; });
+                if (line.trim().length > 0 && !/[.!?]$/.test(line.replace(/&nbsp;/g, ' '))) line += '.';
+                line += trailing;
+                lines[i] = line;
+            }
+            return lines.join('●');
+        }
+
+        function toggleLimparBusca() {
+            const btn = document.getElementById('btnLimparBusca');
+            if (document.getElementById('campoBusca').value.length > 0) btn.style.display = 'block';
+            else btn.style.display = 'none';
+        }
+        
+        function limparBusca() {
+            document.getElementById('campoBusca').value = '';
+            toggleLimparBusca();
+            filtrarLista();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if(localStorage.getItem('temaNoturno') === 'true') document.body.classList.add('dark-mode');
+            carregarDaNuvem();
+
+            const txtExemplo = document.getElementById('exemplo');
+            const txtEditExemplo = document.getElementById('editExemplo');
+
+            function handleEnterBolinha(e) {
+                if (e.key === 'Enter') { e.preventDefault(); document.execCommand('insertText', false, '\n● '); }
+            }
+            
+            function handleFocusBolinha() {
+                if (this.innerText.trim() === '') {
+                    this.innerHTML = '● ';
+                    let range = document.createRange(); let sel = window.getSelection();
+                    range.selectNodeContents(this); range.collapse(false);
+                    sel.removeAllRanges(); sel.addRange(range);
+                }
+            }
+
+            function handlePaste(e) {
+                e.preventDefault();
+                let text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                document.execCommand('insertText', false, text);
+            }
+
+            [txtExemplo, txtEditExemplo].forEach(el => {
+                if(el) { el.addEventListener('keydown', handleEnterBolinha); el.addEventListener('focus', handleFocusBolinha); el.addEventListener('paste', handlePaste); }
+            });
+
+            const txtSig = document.getElementById('significado');
+            const txtEditSig = document.getElementById('editSignificado');
+            [txtSig, txtEditSig].forEach(el => { if(el) el.addEventListener('paste', handlePaste); });
+        });
+
+        function toggleTema() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            document.getElementById('btnTema').innerText = isDark ? '☀️' : '🌙';
+            localStorage.setItem('temaNoturno', isDark);
+        }
+
+        function obterCorFixa(palavra) {
+            let hash = 0;
+            for (let i = 0; i < palavra.length; i++) hash = palavra.charCodeAt(i) + ((hash << 5) - hash);
+            return paletaCores[Math.abs(hash) % paletaCores.length];
+        }
+
         function abrirEdicao(row) {
             if (String(row).startsWith('temp-')) return alert("Aguarde salvamento.");
             const item = palavrasGlobais.find(i => i.row == row);
@@ -827,7 +933,6 @@
 
             document.getElementById('editRow').value = item.row;
             document.getElementById('editPalavra').value = item.palavra;
-            
             document.getElementById('editSignificado').innerHTML = item.significado;
             
             let oldEx = (item.exemplo === '-' || !item.exemplo) ? '' : item.exemplo;
@@ -836,14 +941,10 @@
                 oldEx = oldEx.split('\n').map(l => l.trim() !== '' ? '● ' + l.trim() : '').join('<br>');
             }
             document.getElementById('editExemplo').innerHTML = oldEx;
-            
             document.getElementById('modalEdicao').style.display = 'flex';
         }
         
-        function abrirEdicaoDoModal(row) {
-            fecharModal('modalCompleto');
-            abrirEdicao(row);
-        }
+        function abrirEdicaoDoModal(row) { fecharModal('modalCompleto'); abrirEdicao(row); }
 
         function enviarEdicao() {
             const row = document.getElementById('editRow').value;
@@ -853,7 +954,6 @@
 
             if(!pal) return alert("Preencha a palavra!");
             pal = pal.charAt(0).toUpperCase() + pal.slice(1);
-
             fecharModal('modalEdicao'); 
 
             const index = palavrasGlobais.findIndex(item => item.row == row);
@@ -870,7 +970,6 @@
         function apagarPalavra(row) {
             if(confirm("Tem certeza que deseja apagar permanentemente esta palavra?")) {
                 fecharModal('modalCompleto');
-                
                 palavrasGlobais = palavrasGlobais.filter(item => item.row != row);
                 const busca = document.getElementById('campoBusca').value.toLowerCase();
                 if(busca !== "") filtrarLista(); else renderizarNaTela(palavrasGlobais);
@@ -884,7 +983,6 @@
         function abrirVisaoCompleta(row) {
             const item = palavrasGlobais.find(i => i.row == row);
             if(!item) return;
-            
             const termoBusca = document.getElementById('campoBusca').value;
 
             document.getElementById('boxCompleto').style.backgroundColor = obterCorFixa(item.palavra);
@@ -898,9 +996,7 @@
                 divExemplo.style.display = 'block'; 
                 let exFormatado = formatarExemploHTML(item.exemplo);
                 divExemplo.innerHTML = destacarTexto(exFormatado, termoBusca);
-            } else {
-                divExemplo.style.display = 'none';
-            }
+            } else { divExemplo.style.display = 'none'; }
 
             document.getElementById('compAcoes').innerHTML = `
                 <button class="btn-acao" onclick="copiarPalavra('${item.row}', this)">📋 Copiar</button>
@@ -908,7 +1004,6 @@
                 <button class="btn-acao" onclick="baixarImagem('${item.row}', this)">📥 Baixar</button>
                 <button class="btn-acao" style="background: rgba(239, 68, 68, 0.15); color: #b91c1c;" onclick="apagarPalavra('${item.row}')">🗑️ Apagar</button>
             `;
-
             document.getElementById('modalCompleto').style.display = 'flex';
         }
 
@@ -917,14 +1012,11 @@
         function copiarPalavra(row, btnElement) {
             const item = palavrasGlobais.find(i => i.row == row);
             if(!item) return;
-            const tempDiv = document.createElement("div");
-            tempDiv.innerHTML = item.significado;
-            
+            const tempDiv = document.createElement("div"); tempDiv.innerHTML = item.significado;
             const textoCopiado = tempDiv.innerText ? `${item.palavra} → ${tempDiv.innerText}` : `${item.palavra}`;
             
             navigator.clipboard.writeText(textoCopiado).then(() => {
-                const textoOriginal = btnElement.innerHTML;
-                btnElement.innerHTML = '✅ Copiado';
+                const textoOriginal = btnElement.innerHTML; btnElement.innerHTML = '✅ Copiado';
                 setTimeout(() => { btnElement.innerHTML = textoOriginal; }, 2000);
             });
         }
@@ -932,33 +1024,26 @@
         function filtrarLista() {
             paginaAtual = 1; 
             const busca = document.getElementById('campoBusca').value.toLowerCase();
-            
             renderizarNaTela(palavrasGlobais.filter(item => {
                 const pal = item.palavra ? item.palavra.toLowerCase() : '';
                 const sig = item.significado ? item.significado.toLowerCase() : '';
                 const ex = (item.exemplo && item.exemplo !== '-') ? item.exemplo.toLowerCase() : '';
-                
                 return pal.includes(busca) || sig.includes(busca) || ex.includes(busca);
             }));
         }
 
         function mudarPagina(direcao) {
             const busca = document.getElementById('campoBusca').value.toLowerCase();
-            
             const arrayAtual = palavrasGlobais.filter(item => {
                 const pal = item.palavra ? item.palavra.toLowerCase() : '';
                 const sig = item.significado ? item.significado.toLowerCase() : '';
                 const ex = (item.exemplo && item.exemplo !== '-') ? item.exemplo.toLowerCase() : '';
-                
                 return pal.includes(busca) || sig.includes(busca) || ex.includes(busca);
             });
-            
             const totalPaginas = Math.ceil(arrayAtual.length / itensPorPagina);
             let novaPagina = paginaAtual + direcao;
-            
             if (novaPagina >= 1 && novaPagina <= totalPaginas) {
-                paginaAtual = novaPagina;
-                renderizarNaTela(arrayAtual);
+                paginaAtual = novaPagina; renderizarNaTela(arrayAtual);
             }
         }
 
@@ -966,7 +1051,6 @@
             const lista = document.getElementById('minhaLista');
             const divPaginacao = document.getElementById('paginacao');
             lista.innerHTML = ''; divPaginacao.innerHTML = '';
-            
             const termoBusca = document.getElementById('campoBusca').value;
 
             const totalPaginas = Math.ceil(arrayDados.length / itensPorPagina);
@@ -981,19 +1065,14 @@
                 li.style.backgroundColor = obterCorFixa(item.palavra); 
                 
                 li.onclick = function(e) { 
-                    if(isSelectionMode) {
-                        const cb = li.querySelector('.cb-selecao');
-                        toggleWordSelection(item.row, cb);
-                    } else {
-                        abrirVisaoCompleta(item.row); 
-                    }
+                    if(isSelectionMode) { const cb = li.querySelector('.cb-selecao'); toggleWordSelection(item.row, cb); } 
+                    else { abrirVisaoCompleta(item.row); }
                 };
 
                 let sigFormatado = formatarSignificadoHTML(item.significado);
                 sigFormatado = destacarTexto(sigFormatado, termoBusca);
                 
                 let temExemplo = (item.exemplo && item.exemplo.trim() !== '' && item.exemplo !== '-');
-                
                 let htmlExemplo = '';
                 if(temExemplo) {
                     let exFormatado = formatarExemploHTML(item.exemplo);
@@ -1016,27 +1095,18 @@
 
             const slotsVazios = itensPorPagina - itensPagina.length;
             for(let i = 0; i < slotsVazios; i++) {
-                const emptyLi = document.createElement('li');
-                emptyLi.className = 'card empty-card'; 
-                emptyLi.style.visibility = 'hidden';
-                emptyLi.style.pointerEvents = 'none';
-                lista.appendChild(emptyLi);
+                const emptyLi = document.createElement('li'); emptyLi.className = 'card empty-card'; emptyLi.style.visibility = 'hidden'; emptyLi.style.pointerEvents = 'none'; lista.appendChild(emptyLi);
             }
 
             if (totalPaginas > 1) {
                 let maxVisiveis = 9;
                 let startPage = Math.max(1, paginaAtual - Math.floor(maxVisiveis / 2));
                 let endPage = startPage + maxVisiveis - 1;
-
-                if (endPage > totalPaginas) {
-                    endPage = totalPaginas;
-                    startPage = Math.max(1, endPage - maxVisiveis + 1);
-                }
+                if (endPage > totalPaginas) { endPage = totalPaginas; startPage = Math.max(1, endPage - maxVisiveis + 1); }
 
                 for(let i = startPage; i <= endPage; i++) {
                     const btn = document.createElement('button');
-                    btn.className = 'btn-pag' + (i === paginaAtual ? ' ativo' : '');
-                    btn.innerText = i;
+                    btn.className = 'btn-pag' + (i === paginaAtual ? ' ativo' : ''); btn.innerText = i;
                     btn.onclick = () => { paginaAtual = i; renderizarNaTela(arrayDados); };
                     divPaginacao.appendChild(btn);
                 }
@@ -1044,7 +1114,6 @@
 
             const fabPrev = document.getElementById('fabPrev');
             const fabNext = document.getElementById('fabNext');
-            
             if (fabPrev && fabNext) {
                 fabPrev.style.display = (paginaAtual > 1) ? 'flex' : 'none';
                 fabNext.style.display = (paginaAtual < totalPaginas) ? 'flex' : 'none';
@@ -1062,44 +1131,18 @@
             const bgColor = obterCorFixa(item.palavra);
             
             Object.assign(tempDiv.style, {
-                width: '1080px',
-                height: '1350px',
-                backgroundColor: bgColor,
-                position: 'fixed',
-                top: '-9999px',
-                left: '-9999px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center', 
-                padding: '120px',
-                boxSizing: 'border-box',
-                fontFamily: "'Nunito', sans-serif",
-                color: '#111827',
-                zIndex: '-1'
+                width: '1080px', height: '1350px', backgroundColor: bgColor, position: 'fixed', top: '-9999px', left: '-9999px', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '120px', boxSizing: 'border-box', fontFamily: "'Nunito', sans-serif", color: '#111827', zIndex: '-1'
             });
 
             let sigFormatado = formatarSignificadoHTML(item.significado);
-            
             let htmlExemplo = '';
             if (item.exemplo && item.exemplo !== '-' && item.exemplo.trim() !== '') {
                 let exFormatado = formatarExemploHTML(item.exemplo);
                 exFormatado = exFormatado.replace(/●/g, '<span style="color: #374151; font-size: 35px; margin-right: 15px;">●</span>');
-
-                htmlExemplo = `
-                    <div style="background: rgba(255,255,255,0.5); padding: 50px; border-radius: 30px; font-style: italic; font-size: 45px; color: #374151; line-height: 1.5; width: 100%; box-sizing: border-box;">
-                        ${exFormatado}
-                    </div>
-                `;
+                htmlExemplo = `<div style="background: rgba(255,255,255,0.5); padding: 50px; border-radius: 30px; font-style: italic; font-size: 45px; color: #374151; line-height: 1.5; width: 100%; box-sizing: border-box;">${exFormatado}</div>`;
             }
 
-            tempDiv.innerHTML = `
-                <div style="width: 100%; display: flex; flex-direction: column;">
-                    <div style="font-size: 110px; font-weight: 900; color: #111827; margin-bottom: 15px;">${escapeHTML(item.palavra)}</div>
-                    <div style="font-size: 55px; line-height: 1.5; color: #111827; margin-bottom: 50px;">${sigFormatado}</div>
-                    ${htmlExemplo}
-                </div>
-            `;
-
+            tempDiv.innerHTML = `<div style="width: 100%; display: flex; flex-direction: column;"><div style="font-size: 110px; font-weight: 900; color: #111827; margin-bottom: 15px;">${escapeHTML(item.palavra)}</div><div style="font-size: 55px; line-height: 1.5; color: #111827; margin-bottom: 50px;">${sigFormatado}</div>${htmlExemplo}</div>`;
             document.body.appendChild(tempDiv);
 
             html2canvas(tempDiv, { scale: 1, backgroundColor: bgColor }).then(canvas => {
@@ -1107,14 +1150,10 @@
                 link.download = `Palavra_${item.palavra.replace(/<[^>]*>?/gm, '')}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                
                 document.body.removeChild(tempDiv);
-                btnElement.innerHTML = '✅ Baixado!';
-                setTimeout(() => { btnElement.innerHTML = textoOriginal; }, 2000);
+                btnElement.innerHTML = '✅ Baixado!'; setTimeout(() => { btnElement.innerHTML = textoOriginal; }, 2000);
             }).catch(err => {
-                console.error(err);
-                btnElement.innerHTML = '❌ Erro';
-                setTimeout(() => { btnElement.innerHTML = textoOriginal; }, 2000);
+                console.error(err); btnElement.innerHTML = '❌ Erro'; setTimeout(() => { btnElement.innerHTML = textoOriginal; }, 2000);
             });
         }
     </script>
