@@ -275,6 +275,10 @@
         
         .card-palavra { font-size: 20px; font-weight: 900; color: #111827; word-break: break-word; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         
+        .cb-selecao {
+            width: 18px; height: 18px; cursor: pointer; accent-color: var(--primaria); flex-shrink: 0;
+        }
+
         .card-significado { 
             font-size: 15px; color: #374151; margin-bottom: 10px; line-height: 1.4; 
             overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; flex-shrink: 0; 
@@ -298,8 +302,21 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: hidden; transition: background 0.3s;
             display: flex; flex-direction: column;
         }
-        
-        #editSignificado, #editExemplo { min-height: 100px; max-height: 200px; }
+
+        /* AJUSTE: Scroll apenas na div de inputs do modal de edição */
+        .modal-box .inputs-container {
+            overflow-y: auto;
+            min-height: 0;
+            flex-shrink: 1;
+            padding-right: 5px;
+            margin-bottom: 15px;
+        }
+        .modal-box .inputs-container::-webkit-scrollbar { width: 6px; }
+        .modal-box .inputs-container::-webkit-scrollbar-track { background: transparent; }
+        .modal-box .inputs-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        body.dark-mode .modal-box .inputs-container::-webkit-scrollbar-thumb { background: #475569; }
+
+        #editSignificado, #editExemplo { min-height: 100px; height: auto; }
 
         .btn-fechar-x {
             position: absolute; top: 15px; right: 15px;
@@ -410,6 +427,11 @@
         <div class="header-esq">
             <h1>☁️ Dicionário</h1>
             <div class="contador-cards" id="contadorCards" title="Total de cards">0</div>
+            
+            <!-- NOVOS BOTÕES DE SELEÇÃO E CÓPIA -->
+            <button class="btn-imprimir" id="btnToggleSelection" onclick="toggleSelectionMode()" title="Selecionar Palavras">☑️</button>
+            <button class="btn-imprimir" id="btnCopySelected" onclick="copiarSelecionados()" style="display:none; background: #10b981;" title="Copiar Selecionados">📋</button>
+            
             <button class="btn-imprimir" onclick="imprimirDicionario()" title="Imprimir Dicionário">🖨️</button>
         </div>
         
@@ -431,7 +453,7 @@
         <div class="card-add">
             <h2>✨ Qual a nova?</h2>
             
-            <div class="inputs-container">
+            <div class="inputs-container" style="margin-bottom: 15px;">
                 <input type="text" id="palavra" class="campo" placeholder="Digite uma nova palavra">
                 
                 <div class="toolbar-formato">
@@ -464,7 +486,7 @@
             <button class="btn-fechar-x" onclick="fecharModal('modalEdicao')">✖</button>
             <h3>✏️ Editar Palavra</h3>
             
-            <div class="inputs-container" style="margin-bottom: 0;">
+            <div class="inputs-container">
                 <input type="hidden" id="editRow">
                 <input type="text" id="editPalavra" class="campo">
                 
@@ -493,8 +515,6 @@
             <div class="comp-exemplo" id="compExemplo"></div>
             
             <div id="compAcoes" class="card-acoes" style="margin-top: 25px; margin-bottom: 10px;"></div>
-            
-            <button class="btn-cancelar" onclick="fecharModal('modalCompleto')">Fechar</button>
         </div>
     </div>
 
@@ -506,6 +526,10 @@
         let palavrasGlobais = [];
         let paginaAtual = 1;
         const itensPorPagina = 9;
+
+        // Variaveis para a nova função de seleção e cópia
+        let isSelectionMode = false;
+        let selectedWords = new Set();
 
         const paletaCores = [
             '#fbf8cc', '#fde4cf', '#ffcfd2', '#f1c0e8', '#cfbaf0', '#a3c4f3', '#90dbf4', '#8eecf5', '#98f5e1', '#b9fbc0',
@@ -522,7 +546,6 @@
             }
         }
 
-        // Função para organizar e acionar a impressão
         function imprimirDicionario() {
             if(palavrasGlobais.length === 0) {
                 alert("Nenhuma palavra para imprimir.");
@@ -530,24 +553,64 @@
             }
 
             const area = document.getElementById('areaImpressao');
-            area.innerHTML = ''; // Limpa a área antes de recriar
+            area.innerHTML = ''; 
 
-            // Organiza em ordem alfabética para a impressão
             const palavrasOrdenadas = [...palavrasGlobais].sort((a, b) => a.palavra.localeCompare(b.palavra));
 
             palavrasOrdenadas.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'print-item';
                 
-                // Formata o texto para ficar com o visual "Palavra: Significado"
                 let sigLimpo = formatarSignificadoHTML(item.significado);
                 div.innerHTML = `<strong>${escapeHTML(item.palavra)}:</strong> ${sigLimpo}`;
                 
                 area.appendChild(div);
             });
 
-            // Aciona a caixa de diálogo de impressão do navegador
             window.print();
+        }
+
+        // Funções de Seleção Múltipla
+        function toggleSelectionMode() {
+            isSelectionMode = !isSelectionMode;
+            selectedWords.clear();
+            
+            document.getElementById('btnCopySelected').style.display = isSelectionMode ? 'flex' : 'none';
+            document.getElementById('btnToggleSelection').style.background = isSelectionMode ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.2)';
+            
+            filtrarLista(); 
+        }
+
+        function toggleWordSelection(row, checkboxElement) {
+            if(selectedWords.has(row)) {
+                selectedWords.delete(row);
+                if(checkboxElement) checkboxElement.checked = false;
+            } else {
+                selectedWords.add(row);
+                if(checkboxElement) checkboxElement.checked = true;
+            }
+        }
+
+        function copiarSelecionados() {
+            if(selectedWords.size === 0) {
+                alert("Nenhuma palavra selecionada.");
+                return;
+            }
+            
+            const palavrasParaCopiar = palavrasGlobais
+                .filter(p => selectedWords.has(p.row))
+                .map(p => p.palavra);
+                
+            const texto = palavrasParaCopiar.join(', ');
+            
+            navigator.clipboard.writeText(texto).then(() => {
+                toggleSelectionMode(); 
+                
+                const btnToggle = document.getElementById('btnToggleSelection');
+                const oldText = btnToggle.innerText;
+                btnToggle.innerText = '✅';
+                setTimeout(() => { btnToggle.innerText = oldText; }, 2000);
+            });
         }
 
         function escapeRegExp(string) {
@@ -917,7 +980,14 @@
                 li.className = 'card';
                 li.style.backgroundColor = obterCorFixa(item.palavra); 
                 
-                li.onclick = function() { abrirVisaoCompleta(item.row); };
+                li.onclick = function(e) { 
+                    if(isSelectionMode) {
+                        const cb = li.querySelector('.cb-selecao');
+                        toggleWordSelection(item.row, cb);
+                    } else {
+                        abrirVisaoCompleta(item.row); 
+                    }
+                };
 
                 let sigFormatado = formatarSignificadoHTML(item.significado);
                 sigFormatado = destacarTexto(sigFormatado, termoBusca);
@@ -931,9 +1001,12 @@
                     htmlExemplo = `<div class="card-exemplo">${exFormatado}</div>`;
                 }
 
+                const checkboxHtml = isSelectionMode ? `<input type="checkbox" class="cb-selecao" ${selectedWords.has(item.row) ? 'checked' : ''} onclick="event.stopPropagation(); toggleWordSelection('${item.row}', this)">` : '';
+
                 li.innerHTML = `
                     <div class="card-header">
                         <div class="card-palavra" title="${escapeHTML(item.palavra)}">${escapeHTML(item.palavra)}</div>
+                        ${checkboxHtml}
                     </div>
                     <div class="card-significado">${sigFormatado}</div>
                     ${htmlExemplo}
