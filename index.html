@@ -646,7 +646,6 @@
                 const termoEscapado = escapeRegExp(item.palavra.trim());
                 const regex = new RegExp(`(^|[^a-zA-ZáéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ])(${termoEscapado})(?=[^a-zA-ZáéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ]|$)`, 'gi');
                 
-                // Salva a palavra em minúsculas e escapada no data-attribute para evitar conflitos de ID (Number x String)
                 const palavraLimpa = escapeHTML(item.palavra.toLowerCase());
                 htmlTexto = htmlTexto.replace(regex, `$1<span class="palavra-mapeada" data-palavra="${palavraLimpa}">$2</span>`);
             });
@@ -654,14 +653,11 @@
             resultadoDiv.innerHTML = htmlTexto;
         }
 
-        // --- SISTEMA DE CLIQUE NO BALÃO ---
         document.addEventListener('click', function(e) {
             const tooltip = document.getElementById('tooltipLeitura');
 
             if(e.target && e.target.classList && e.target.classList.contains('palavra-mapeada')) {
                 const palavraAttr = e.target.getAttribute('data-palavra');
-                
-                // Busca a palavra exata usando o nome, não o ID
                 const item = palavrasGlobais.find(i => i.palavra && escapeHTML(i.palavra.toLowerCase()) === palavraAttr);
                 
                 if(!item) return;
@@ -685,7 +681,6 @@
             }
         });
 
-        // --- SISTEMA DE SELEÇÃO E ADIÇÃO ---
         document.addEventListener('selectionchange', () => {
             if(!isModoLeitura) return;
             
@@ -754,6 +749,66 @@
             mostrarToast(`"${palavraSelecionada}" adicionada! Edite depois no painel.`);
         }
 
+        // --- SISTEMA DE CÓPIA UNIVERSAL ---
+        function copiarTextoUniversal(texto, callbackSucesso) {
+            // Tenta usar a API moderna se estiver disponível e em ambiente seguro
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(texto).then(callbackSucesso).catch(usarFallback);
+            } else {
+                usarFallback();
+            }
+
+            // Fallback para celulares antigos ou arquivos abertos sem HTTPS
+            function usarFallback() {
+                try {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = texto;
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-999999px";
+                    textArea.style.top = "-999999px";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    document.execCommand('copy');
+                    textArea.remove();
+                    callbackSucesso();
+                } catch (err) {
+                    console.error("Erro ao copiar", err);
+                    alert("Seu navegador bloqueou a cópia automática.");
+                }
+            }
+        }
+
+        function copiarSelecionados() {
+            if(selectedWords.size === 0) return alert("Nenhuma palavra selecionada.");
+            
+            const palavrasParaCopiar = palavrasGlobais
+                .filter(p => selectedWords.has(p.row))
+                .map(p => p.palavra);
+                
+            const texto = palavrasParaCopiar.join(', ');
+            
+            copiarTextoUniversal(texto, () => {
+                toggleSelectionMode(); 
+                const btnToggle = document.getElementById('btnToggleSelection');
+                const oldText = btnToggle.innerText;
+                btnToggle.innerText = '✅';
+                setTimeout(() => { btnToggle.innerText = oldText; }, 2000);
+            });
+        }
+
+        function copiarPalavra(row, btnElement) {
+            const item = palavrasGlobais.find(i => i.row == row);
+            if(!item) return;
+            const tempDiv = document.createElement("div"); tempDiv.innerHTML = item.significado;
+            const textoCopiado = tempDiv.innerText ? `${item.palavra} → ${tempDiv.innerText}` : `${item.palavra}`;
+            
+            copiarTextoUniversal(textoCopiado, () => {
+                const textoOriginal = btnElement.innerHTML; 
+                btnElement.innerHTML = '✅ Copiado';
+                setTimeout(() => { btnElement.innerHTML = textoOriginal; }, 2000);
+            });
+        }
 
         // --- FUNÇÕES GERAIS ---
         function imprimirDicionario() {
@@ -792,24 +847,6 @@
                 selectedWords.add(row);
                 if(checkboxElement) checkboxElement.checked = true;
             }
-        }
-
-        function copiarSelecionados() {
-            if(selectedWords.size === 0) return alert("Nenhuma palavra selecionada.");
-            
-            const palavrasParaCopiar = palavrasGlobais
-                .filter(p => selectedWords.has(p.row))
-                .map(p => p.palavra);
-                
-            const texto = palavrasParaCopiar.join(', ');
-            
-            navigator.clipboard.writeText(texto).then(() => {
-                toggleSelectionMode(); 
-                const btnToggle = document.getElementById('btnToggleSelection');
-                const oldText = btnToggle.innerText;
-                btnToggle.innerText = '✅';
-                setTimeout(() => { btnToggle.innerText = oldText; }, 2000);
-            });
         }
 
         function escapeRegExp(string) { return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
@@ -1008,18 +1045,6 @@
         }
 
         function fecharModal(idModal) { document.getElementById(idModal).style.display = 'none'; }
-
-        function copiarPalavra(row, btnElement) {
-            const item = palavrasGlobais.find(i => i.row == row);
-            if(!item) return;
-            const tempDiv = document.createElement("div"); tempDiv.innerHTML = item.significado;
-            const textoCopiado = tempDiv.innerText ? `${item.palavra} → ${tempDiv.innerText}` : `${item.palavra}`;
-            
-            navigator.clipboard.writeText(textoCopiado).then(() => {
-                const textoOriginal = btnElement.innerHTML; btnElement.innerHTML = '✅ Copiado';
-                setTimeout(() => { btnElement.innerHTML = textoOriginal; }, 2000);
-            });
-        }
 
         function filtrarLista() {
             paginaAtual = 1; 
